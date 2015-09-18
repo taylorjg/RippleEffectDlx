@@ -41,7 +41,7 @@ namespace RippleEffectDlxConsole
 
         public void Draw()
         {
-            foreach (var row in _rows) DrawRow(row);
+            foreach (var row in _rows.Reverse()) DrawRow(row);
         }
 
         private static void DrawRow(IEnumerable<int> row)
