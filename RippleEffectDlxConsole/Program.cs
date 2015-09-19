@@ -114,9 +114,9 @@ namespace RippleEffectDlxConsole
 
             Console.WriteLine();
 
-            //Console.WriteLine("Solution:");
-            //var solutionGrid = Solve(rooms, initialValues);
-            //solutionGrid.Draw();
+            Console.WriteLine("Solution:");
+            var solutionGrid = Solve(rooms, initialValues);
+            solutionGrid.Draw();
         }
 
         private static Grid InitialGrid(IImmutableList<Room> rooms, IEnumerable<Tuple<Coords, int>> initialValues)
@@ -144,7 +144,7 @@ namespace RippleEffectDlxConsole
             var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Y) + 1;
             var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.X) + 1;
 
-            var internalRows1 = rooms.SelectMany(room => BuildInternalRowsForRoom(room, initialValues));
+            var internalRows1 = rooms.SelectMany(room => BuildInternalRowsForRoom(initialValues, room));
             var internalRows2 = initialValues.Select(t => BuildInternalRow(t.Item1, t.Item2, true));
             var internalRows = internalRows1.Concat(internalRows2).ToImmutableList();
 
@@ -163,8 +163,8 @@ namespace RippleEffectDlxConsole
         }
 
         private static IEnumerable<Tuple<Coords, int, bool>> BuildInternalRowsForRoom(
-            Room room,
-            IImmutableList<Tuple<Coords, int>> initialValues)
+            IImmutableList<Tuple<Coords, int>> initialValues,
+            Room room)
         {
             var ivCoords = initialValues.Select(iv => iv.Item1);
             var ivValues = initialValues.Select(iv => iv.Item2);
@@ -186,22 +186,46 @@ namespace RippleEffectDlxConsole
         private static IImmutableList<IImmutableList<int>> BuildDlxRows(
             int numRows,
             int numCols,
-            IImmutableList<Tuple<Coords, int, bool>> internalRows)
+            IEnumerable<Tuple<Coords, int, bool>> internalRows)
         {
-            // Need primary and secondary columns
-            // - primary for each (row, col) coords (total num bits: num rows x num cols)
-            //  - all bits 0 except the:
-            //   - bit representing the row / col
-            // - secondary for each cell in the row (total num bits: num cols)
-            //  - all bits 0 except for:
-            //   - the bit representing col within the row
-            //   - bits representing the n cols either side (L/R) that are valid locations
-            // - secondary for each cell in the col (total num bits: num rows)
-            //  - all bits 0 except for:
-            //   - the bit representing row within the col
-            //   - bits representing the n rows either side (U/D) that are valid locations
+            return internalRows
+                .Select(internalRow => BuildDlxRow(numRows, numCols, internalRow))
+                .ToImmutableList();
+        }
 
-            return null;
+        private static IImmutableList<int> BuildDlxRow(
+            int numRows,
+            int numCols,
+            Tuple<Coords, int, bool> internalRow)
+        {
+            Func<int, bool> isValidRow = n => n >= 0 && n < numRows;
+            Func<int, bool> isValidCol = n => n >= 0 && n < numCols;
+
+            var row = internalRow.Item1.Y;
+            var col = internalRow.Item1.X;
+            var value = internalRow.Item2;
+
+            var primaryColumns = new int[numRows * numCols];
+            var secondaryColumns1 = new int[numRows];
+            var secondaryColumns2 = new int[numCols];
+
+            primaryColumns[row * numCols + col] = 1;
+
+            var numIdxs = 2 * value + 1;
+            var rowIdxs = Enumerable.Range(row - value, numIdxs).Where(isValidRow).ToList();
+            var colIdxs = Enumerable.Range(col - value, numIdxs).Where(isValidCol).ToList();
+
+            rowIdxs.ForEach(rowIdx => secondaryColumns1[rowIdx] = 1);
+            colIdxs.ForEach(colIdx => secondaryColumns2[colIdx] = 1);
+
+            return new[]
+            {
+                primaryColumns,
+                secondaryColumns1,
+                secondaryColumns2
+            }
+                .SelectMany(columns => columns)
+                .ToImmutableList();
         }
     }
 }
