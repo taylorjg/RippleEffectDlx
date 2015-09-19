@@ -144,25 +144,11 @@ namespace RippleEffectDlxConsole
             var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Y) + 1;
             var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.X) + 1;
 
-            // Build internal rows
-            // - lots of rows for each room being careful to take account of initial values
-            // for each room
-            //   BuildInternalRowsForRoom =>
-            //   get list of cells that do not have initial values
-            //   get list of remaining numbers that need to appear in this room
-            //   - i.e. 1 to room size then remove any initial values in this room
-            //   should now have n cells and n remaining numbers
-            //   for each of the cells
-            //     for each of the remaining numbers
-            //       generate an internal row with isFixed = false
-            // end for
-
-            // - one row for each initial value
-            var internalRows1 = Enumerable.Empty<Tuple<Coords, int, bool>>();
+            var internalRows1 = rooms.SelectMany(room => BuildInternalRowsForRoom(room, initialValues));
             var internalRows2 = initialValues.Select(t => BuildInternalRow(t.Item1, t.Item2, true));
             var internalRows = internalRows1.Concat(internalRows2).ToImmutableList();
 
-            var dlxRows = BuildDlxRows(internalRows);
+            var dlxRows = BuildDlxRows(numRows, numCols, internalRows);
 
             var dlx = new Dlx();
             var firstSolution = dlx.Solve(dlxRows, d => d, r => r).First();
@@ -176,7 +162,31 @@ namespace RippleEffectDlxConsole
             return new Grid(rowStrings.ToImmutableList());
         }
 
-        private static IImmutableList<IImmutableList<int>> BuildDlxRows(IImmutableList<Tuple<Coords, int, bool>> internalRows)
+        private static IEnumerable<Tuple<Coords, int, bool>> BuildInternalRowsForRoom(
+            Room room,
+            IImmutableList<Tuple<Coords, int>> initialValues)
+        {
+            var ivCoords = initialValues.Select(iv => iv.Item1);
+            var ivValues = initialValues.Select(iv => iv.Item2);
+
+            var cellsRemaining = room.Cells.Except(ivCoords).ToImmutableList();
+            var valuesRemaining = Enumerable.Range(1, room.Cells.Count).Except(ivValues).ToImmutableList();
+
+            return
+                from cell in cellsRemaining
+                from value in valuesRemaining
+                select BuildInternalRow(cell, value, false);
+        }
+
+        private static Tuple<Coords, int, bool> BuildInternalRow(Coords coords, int value, bool isFixed)
+        {
+            return Tuple.Create(coords, value, isFixed);
+        }
+
+        private static IImmutableList<IImmutableList<int>> BuildDlxRows(
+            int numRows,
+            int numCols,
+            IImmutableList<Tuple<Coords, int, bool>> internalRows)
         {
             // Need primary and secondary columns
             // - primary for each (row, col) coords (total num bits: num rows x num cols)
@@ -192,11 +202,6 @@ namespace RippleEffectDlxConsole
             //   - bits representing the n rows either side (U/D) that are valid locations
 
             return null;
-        }
-
-        private static Tuple<Coords, int, bool> BuildInternalRow(Coords coords, int value, bool isFixed)
-        {
-            return Tuple.Create(coords, value, isFixed);
         }
     }
 }
