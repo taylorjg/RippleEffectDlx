@@ -167,10 +167,10 @@ namespace RippleEffectDlxConsole
             Room room)
         {
             var ivCoords = initialValues.Select(iv => iv.Item1);
-            var ivValues = initialValues.Select(iv => iv.Item2);
+            var ivValuesInThisRoom = initialValues.Where(t => room.Cells.Contains(t.Item1)).Select(iv => iv.Item2);
 
             var cellsRemaining = room.Cells.Except(ivCoords).ToImmutableList();
-            var valuesRemaining = Enumerable.Range(1, room.Cells.Count).Except(ivValues).ToImmutableList();
+            var valuesRemaining = Enumerable.Range(1, room.Cells.Count).Except(ivValuesInThisRoom).ToImmutableList();
 
             return
                 from cell in cellsRemaining
