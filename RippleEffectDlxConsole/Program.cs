@@ -151,7 +151,7 @@ namespace RippleEffectDlxConsole
             var dlxRows = BuildDlxRows(numRows, numCols, internalRows);
 
             var dlx = new Dlx();
-            var firstSolution = dlx.Solve(dlxRows, d => d, r => r).First();
+            var firstSolution = dlx.Solve(dlxRows, d => d, r => r, numRows * numCols).First();
 
             var v1 = firstSolution.RowIndexes.Select(idx => internalRows[idx]);
             var v2 = v1.OrderBy(t => t.Item1.Y).ThenBy(t => t.Item1.X);
