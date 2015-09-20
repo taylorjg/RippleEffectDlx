@@ -191,7 +191,7 @@ namespace RippleEffectDlxConsole
 
             var dlxRows = BuildDlxRows(numRows, numCols, internalRows);
 
-            DumpRows(internalRows, dlxRows);
+            DumpRows(numRows, numCols, internalRows, dlxRows);
 
             var dlx = new Dlx();
             var firstSolution = dlx.Solve(dlxRows, d => d, r => r, numRows * numCols).FirstOrDefault();
@@ -243,40 +243,40 @@ namespace RippleEffectDlxConsole
             int numCols,
             Tuple<Coords, int, bool> internalRow)
         {
-            Func<int, bool> isValidRow = n => n >= 0 && n < numRows;
-            Func<int, bool> isValidCol = n => n >= 0 && n < numCols;
+            Func<Coords, bool> isValidRowCol = coords =>
+                coords.X >= 0 && coords.X < numCols &&
+                coords.Y >= 0 && coords.Y < numRows;
 
             var row = internalRow.Item1.Y;
             var col = internalRow.Item1.X;
             var value = internalRow.Item2;
 
             var primaryColumns = new int[numRows * numCols];
-            var secondaryColumns1 = new int[numRows];
-            var secondaryColumns2 = new int[numCols];
+            var secondaryColumns = new int[numRows * numCols];
 
             primaryColumns[row * numCols + col] = 1;
 
-            var numIdxs = 2 * value + 1;
-            var rowIdxs = Enumerable.Range(row - value, numIdxs).Where(isValidRow).ToList();
-            var colIdxs = Enumerable.Range(col - value, numIdxs).Where(isValidCol).ToList();
+            var rippleDownCoords = Enumerable.Range(row - value, value)
+                .Select(r => new Coords(col, r))
+                .Where(isValidRowCol)
+                .ToList();
 
-            rowIdxs.ForEach(rowIdx => secondaryColumns1[rowIdx] = 1);
-            colIdxs.ForEach(colIdx => secondaryColumns2[colIdx] = 1);
+            var rippleRightCoords = Enumerable.Range(col + 1, value)
+                .Select(c => new Coords(c, row))
+                .Where(isValidRowCol)
+                .ToList();
 
-            secondaryColumns1[row] = 0;
-            secondaryColumns2[col] = 0;
+            rippleDownCoords.ForEach(coords => secondaryColumns[coords.Y * numCols + coords.X] = 1);
+            rippleRightCoords.ForEach(coords => secondaryColumns[coords.Y * numCols + coords.X] = 1);
 
-            return new[]
-            {
-                primaryColumns,
-                secondaryColumns1,
-                secondaryColumns2
-            }
+            return new[] {primaryColumns, secondaryColumns}
                 .SelectMany(columns => columns)
                 .ToImmutableList();
         }
 
         private static void DumpRows(
+            int numRows,
+            int numCols,
             IReadOnlyList<Tuple<Coords, int, bool>> internalRows,
             IReadOnlyList<IImmutableList<int>> dlxRows)
         {
@@ -284,23 +284,27 @@ namespace RippleEffectDlxConsole
             {
                 var internalRow = internalRows[index];
                 var dlxRow = dlxRows[index];
-                DumpRow(internalRow, dlxRow);
+                DumpRow(numRows, numCols, internalRow, dlxRow);
             }
         }
 
         private static void DumpRow(
+            int numRows,
+            int numCols,
             Tuple<Coords, int, bool> internalRow,
             IImmutableList<int> dlxRow)
         {
-            Console.WriteLine($"Coords: {internalRow.Item1}; Value: {internalRow.Item2}; DlxRow: {DlxRowToString(dlxRow)}");
+            Console.WriteLine($"Coords: {internalRow.Item1}; Value: {internalRow.Item2}; DlxRow: {DlxRowToString(numRows, numCols, dlxRow)}");
         }
 
-        private static string DlxRowToString(IImmutableList<int> dlxRow)
+        private static string DlxRowToString(
+            int numRows,
+            int numCols,
+            IImmutableList<int> dlxRow)
         {
-            var part1 = string.Join("", dlxRow.Take(25).Select(n => Convert.ToString(n)));
-            var part2 = string.Join("", dlxRow.Skip(25).Take(5).Select(n => Convert.ToString(n)));
-            var part3 = string.Join("", dlxRow.Skip(30).Take(5).Select(n => Convert.ToString(n)));
-            return string.Join(" ", part1, part2, part3);
+            var part1 = string.Join("", dlxRow.Take(numRows * numCols).Select(n => Convert.ToString(n)));
+            var part2 = string.Join("", dlxRow.Skip(numRows * numCols).Select(n => Convert.ToString(n)));
+            return string.Join(" ", part1, part2);
         }
     }
 }
