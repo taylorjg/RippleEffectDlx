@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Security.Policy;
 using DlxLib;
 
 namespace RippleEffectDlxConsole
@@ -184,12 +185,13 @@ namespace RippleEffectDlxConsole
         {
             var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Y) + 1;
             var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.X) + 1;
+            var maxValue = rooms.Max(r => r.Cells.Count);
 
             var internalRows1 = rooms.SelectMany(room => BuildInternalRowsForRoom(initialValues, room));
             var internalRows2 = initialValues.Select(t => BuildInternalRow(t.Item1, t.Item2, true));
             var internalRows = internalRows1.Concat(internalRows2).ToImmutableList();
 
-            var dlxRows = BuildDlxRows(numRows, numCols, internalRows);
+            var dlxRows = BuildDlxRows(numRows, numCols, maxValue, internalRows);
 
             DumpRows(numRows, numCols, internalRows, dlxRows);
 
@@ -231,16 +233,18 @@ namespace RippleEffectDlxConsole
         private static IImmutableList<IImmutableList<int>> BuildDlxRows(
             int numRows,
             int numCols,
+            int maxValue,
             IEnumerable<Tuple<Coords, int, bool>> internalRows)
         {
             return internalRows
-                .Select(internalRow => BuildDlxRow(numRows, numCols, internalRow))
+                .Select(internalRow => BuildDlxRow(numRows, numCols, maxValue, internalRow))
                 .ToImmutableList();
         }
 
         private static IImmutableList<int> BuildDlxRow(
             int numRows,
             int numCols,
+            int maxValue,
             Tuple<Coords, int, bool> internalRow)
         {
             Func<Coords, bool> isValidRowCol = coords =>
@@ -251,25 +255,36 @@ namespace RippleEffectDlxConsole
             var col = internalRow.Item1.X;
             var value = internalRow.Item2;
 
-            var primaryColumns = new int[numRows * numCols];
-            var secondaryColumns = new int[numRows * numCols];
+            Func<IEnumerable<int[]>> buildSecondaryColumns = () =>
+            {
+                var result = Enumerable.Range(0, maxValue).Select(_ => new int[numRows * numCols]).ToList();
 
+                var rippleUpDownCoords = Enumerable.Range(row - value, value * 2 + 1)
+                    .Select(r => new Coords(col, r))
+                    .Where(isValidRowCol)
+                    .ToList();
+
+                var rippleLeftRightCoords = Enumerable.Range(col - value, value * 2 + 1)
+                    .Select(c => new Coords(c, row))
+                    .Where(isValidRowCol)
+                    .ToList();
+
+                var secondaryColumns = result[value - 1];
+
+                rippleUpDownCoords.ForEach(coords => secondaryColumns[coords.Y * numCols + coords.X] = 1);
+                rippleLeftRightCoords.ForEach(coords => secondaryColumns[coords.Y * numCols + coords.X] = 1);
+
+                return result;
+            };
+
+            var primaryColumns = new int[numRows * numCols];
             primaryColumns[row * numCols + col] = 1;
 
-            var rippleDownCoords = Enumerable.Range(row - value, value)
-                .Select(r => new Coords(col, r))
-                .Where(isValidRowCol)
-                .ToList();
+            var scs = buildSecondaryColumns();
 
-            var rippleRightCoords = Enumerable.Range(col + 1, value)
-                .Select(c => new Coords(c, row))
-                .Where(isValidRowCol)
-                .ToList();
+            var allColumns = new[] {primaryColumns}.Concat(scs);
 
-            rippleDownCoords.ForEach(coords => secondaryColumns[coords.Y * numCols + coords.X] = 1);
-            rippleRightCoords.ForEach(coords => secondaryColumns[coords.Y * numCols + coords.X] = 1);
-
-            return new[] {primaryColumns, secondaryColumns}
+            return allColumns
                 .SelectMany(columns => columns)
                 .ToImmutableList();
         }
@@ -302,9 +317,12 @@ namespace RippleEffectDlxConsole
             int numCols,
             IImmutableList<int> dlxRow)
         {
+            //var part1 = string.Join("", dlxRow.Take(numRows * numCols).Select(n => Convert.ToString(n)));
+            //var part2 = string.Join("", dlxRow.Skip(numRows * numCols).Select(n => Convert.ToString(n)));
+            //return string.Join(" ", part1, part2);
+
             var part1 = string.Join("", dlxRow.Take(numRows * numCols).Select(n => Convert.ToString(n)));
-            var part2 = string.Join("", dlxRow.Skip(numRows * numCols).Select(n => Convert.ToString(n)));
-            return string.Join(" ", part1, part2);
+            return part1;
         }
     }
 }
