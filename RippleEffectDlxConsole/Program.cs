@@ -154,11 +154,13 @@ namespace RippleEffectDlxConsole
             Console.WriteLine("Puzzle:");
             initialGrid.Draw();
 
-            Console.WriteLine();
+            //Console.WriteLine();
 
-            Console.WriteLine("Solution:");
-            var solutionGrid = Solve(rooms, initialValues);
-            solutionGrid?.Draw();
+            //Console.WriteLine("Solution:");
+            //var solutionGrid = Solve(rooms, initialValues);
+            //solutionGrid?.Draw();
+
+            Solve(rooms, initialValues);
         }
 
         private static Grid InitialGrid(IImmutableList<Room> rooms, IEnumerable<Tuple<Coords, int>> initialValues)
@@ -181,7 +183,7 @@ namespace RippleEffectDlxConsole
             return new Grid(rows.ToImmutableList());
         }
 
-        private static Grid Solve(IImmutableList<Room> rooms, IImmutableList<Tuple<Coords, int>> initialValues)
+        private static void Solve(IImmutableList<Room> rooms, IImmutableList<Tuple<Coords, int>> initialValues)
         {
             var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Y) + 1;
             var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.X) + 1;
@@ -193,20 +195,19 @@ namespace RippleEffectDlxConsole
 
             var dlxRows = BuildDlxRows(numRows, numCols, maxValue, internalRows);
 
-            DumpRows(numRows, numCols, internalRows, dlxRows);
-
             var dlx = new Dlx();
-            var firstSolution = dlx.Solve(dlxRows, d => d, r => r, numRows * numCols).FirstOrDefault();
+            var solutions = dlx.Solve(dlxRows, d => d, r => r, numRows*numCols).ToList();
+            Console.WriteLine($"Found {solutions.Count} solutions");
 
-            if (firstSolution == null) return null;
-
-            var v1 = firstSolution.RowIndexes.Select(idx => internalRows[idx]);
-            var v2 = v1.OrderBy(t => t.Item1.Y).ThenBy(t => t.Item1.X);
-
-            var rowStrings = Enumerable.Range(0, numRows)
-                .Select(row => string.Join("", v2.Skip(row * numCols).Take(numRows).Select(t => t.Item2)));
-
-            return new Grid(rowStrings.ToImmutableList());
+            foreach (var solution in solutions)
+            {
+                var v1 = solution.RowIndexes.Select(idx => internalRows[idx]);
+                var v2 = v1.OrderBy(t => t.Item1.Y).ThenBy(t => t.Item1.X);
+                var rowStrings = Enumerable.Range(0, numRows).Select(row => string.Join("", v2.Skip(row * numCols).Take(numRows).Select(t => t.Item2)));
+                var grid = new Grid(rowStrings.ToImmutableList());
+                grid.Draw();
+                Console.WriteLine();
+            }
         }
 
         private static IEnumerable<Tuple<Coords, int, bool>> BuildInternalRowsForRoom(
