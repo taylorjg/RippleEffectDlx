@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
+//using System.Diagnostics;
 using System.Linq;
 using DlxLib;
 
 namespace RippleEffectDlxConsole
 {
+    using InternalRow = Tuple<Coords, int, int, bool>;
+    using InitialValue = Tuple<Coords, int>;
+
     internal static class Program
     {
         private static void Main()
@@ -154,16 +157,19 @@ namespace RippleEffectDlxConsole
             Console.WriteLine("Puzzle:");
             initialGrid.Draw();
 
-            //Console.WriteLine();
+            Console.WriteLine();
 
-            //Console.WriteLine("Solution:");
-            //var solutionGrid = Solve(rooms, initialValues);
-            //solutionGrid?.Draw();
+            var firstSolutionGrid = Solve(rooms, initialValues);
+            Console.WriteLine();
 
-            Solve(rooms, initialValues);
+            if (firstSolutionGrid != null)
+            {
+                Console.WriteLine("Solution:");
+                firstSolutionGrid.Draw();
+            }
         }
 
-        private static Grid InitialGrid(IImmutableList<Room> rooms, IEnumerable<Tuple<Coords, int>> initialValues)
+        private static Grid InitialGrid(IImmutableList<Room> rooms, IEnumerable<InitialValue> initialValues)
         {
             var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Y) + 1;
             var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.X) + 1;
@@ -183,36 +189,37 @@ namespace RippleEffectDlxConsole
             return new Grid(rows.ToImmutableList());
         }
 
-        private static void Solve(IImmutableList<Room> rooms, IImmutableList<Tuple<Coords, int>> initialValues)
+        private static Grid Solve(IReadOnlyList<Room> rooms, IImmutableList<InitialValue> initialValues)
         {
             var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Y) + 1;
             var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.X) + 1;
             var maxValue = rooms.Max(r => r.Cells.Count);
 
-            var internalRows1 = rooms.SelectMany(room => BuildInternalRowsForRoom(initialValues, room));
-            var internalRows2 = initialValues.Select(t => BuildInternalRow(t.Item1, t.Item2, true));
+            var internalRows1 = rooms.SelectMany(room => BuildInternalRowsForRoom(rooms, initialValues, room));
+            var internalRows2 = initialValues.Select(t => BuildInternalRow(rooms, t.Item1, t.Item2, true));
             var internalRows = internalRows1.Concat(internalRows2).ToImmutableList();
 
-            var dlxRows = BuildDlxRows(numRows, numCols, maxValue, internalRows);
+            var dlxRows = BuildDlxRows(rooms, numRows, numCols, maxValue, internalRows);
+
+            //DumpRows(numRows, numCols, internalRows, dlxRows);
 
             var dlx = new Dlx();
             var solutions = dlx.Solve(dlxRows, d => d, r => r, numRows*numCols).ToList();
-            Console.WriteLine($"Found {solutions.Count} solutions");
+            Console.WriteLine($"Number of solutions found: {solutions.Count}");
+            var firstSolution = solutions.FirstOrDefault();
 
-            foreach (var solution in solutions)
-            {
-                var v1 = solution.RowIndexes.Select(idx => internalRows[idx]);
-                var v2 = v1.OrderBy(t => t.Item1.Y).ThenBy(t => t.Item1.X);
-                var rowStrings = Enumerable.Range(0, numRows).Select(row => string.Join("", v2.Skip(row * numCols).Take(numRows).Select(t => t.Item2)));
-                var grid = new Grid(rowStrings.ToImmutableList());
-                grid.Draw();
-                Console.WriteLine();
-            }
+            if (firstSolution == null) return null;
+
+            var subsetOfInternalRows = firstSolution.RowIndexes.Select(idx => internalRows[idx]).ToImmutableList();
+            //var subsetOfDlxRows = solution.RowIndexes.Select(idx => dlxRows[idx]).ToImmutableList();
+            //DumpRows(numRows, numCols, subsetOfInternalRows, subsetOfDlxRows);
+            var orderedSubsetOfInternalRows = subsetOfInternalRows.OrderBy(t => t.Item1.Y).ThenBy(t => t.Item1.X);
+            var rowStrings = Enumerable.Range(0, numRows).Select(row => string.Join("", orderedSubsetOfInternalRows.Skip(row * numCols).Take(numRows).Select(t => t.Item2)));
+            var grid = new Grid(rowStrings.ToImmutableList());
+            return grid;
         }
 
-        private static IEnumerable<Tuple<Coords, int, bool>> BuildInternalRowsForRoom(
-            IImmutableList<Tuple<Coords, int>> initialValues,
-            Room room)
+        private static IEnumerable<InternalRow> BuildInternalRowsForRoom(IReadOnlyList<Room> rooms, IImmutableList<InitialValue> initialValues, Room room)
         {
             var ivCoords = initialValues.Select(iv => iv.Item1);
             var ivValuesInThisRoom = initialValues.Where(t => room.Cells.Contains(t.Item1)).Select(iv => iv.Item2);
@@ -223,30 +230,39 @@ namespace RippleEffectDlxConsole
             return
                 from cell in cellsRemaining
                 from value in valuesRemaining
-                select BuildInternalRow(cell, value, false);
+                select BuildInternalRow(rooms, cell, value, false);
         }
 
-        private static Tuple<Coords, int, bool> BuildInternalRow(Coords coords, int value, bool isFixed)
+        private static InternalRow BuildInternalRow(IReadOnlyList<Room> rooms, Coords coords, int value, bool isFixed)
         {
-            return Tuple.Create(coords, value, isFixed);
+            var roomIndex = GetRoomIndexForCoords(rooms, coords);
+            return Tuple.Create(coords, value, roomIndex, isFixed);
         }
 
-        private static IImmutableList<IImmutableList<int>> BuildDlxRows(
-            int numRows,
-            int numCols,
-            int maxValue,
-            IEnumerable<Tuple<Coords, int, bool>> internalRows)
+        private static int GetRoomIndexForCoords(IReadOnlyList<Room> rooms, Coords coords)
+        {
+            for (var roomIndex = 0; roomIndex < rooms.Count; roomIndex++)
+            {
+                var room = rooms[roomIndex];
+                if (room.Cells.Contains(coords)) return roomIndex;
+            }
+
+            throw new InvalidOperationException($"Failed to find coords {coords} in any room!");
+        }
+
+        private static IImmutableList<IImmutableList<int>> BuildDlxRows(IReadOnlyList<Room> rooms, int numRows, int numCols, int maxValue, IEnumerable<InternalRow> internalRows)
         {
             return internalRows
-                .Select(internalRow => BuildDlxRow(numRows, numCols, maxValue, internalRow))
+                .Select(internalRow => BuildDlxRow(rooms, numRows, numCols, maxValue, internalRow))
                 .ToImmutableList();
         }
 
         private static IImmutableList<int> BuildDlxRow(
+            IReadOnlyList<Room> rooms,
             int numRows,
             int numCols,
             int maxValue,
-            Tuple<Coords, int, bool> internalRow)
+            InternalRow internalRow)
         {
             Func<Coords, bool> isValidRowCol = coords =>
                 coords.X >= 0 && coords.X < numCols &&
@@ -257,10 +273,11 @@ namespace RippleEffectDlxConsole
             var row = internalRow.Item1.Y;
             var col = internalRow.Item1.X;
             var value = internalRow.Item2;
+            var roomIndex = internalRow.Item3;
 
-            Func<IEnumerable<int[]>> buildSecondaryColumns = () =>
+            Func<IEnumerable<int[]>> buildRippleCoordsSecondaryColumns = () =>
             {
-                var allSecondaryColumns = Enumerable.Range(0, maxValue * 4).Select(_ => new int[numRows * numCols]).ToList();
+                var allRippleSecondaryColumns = Enumerable.Range(0, maxValue * 4).Select(_ => new int[numRows * numCols]).ToList();
 
                 var rippleUpCoords = Enumerable.Range(row, value + 1)
                     .Select(r => new Coords(col, r))
@@ -283,27 +300,32 @@ namespace RippleEffectDlxConsole
                     .ToList();
 
                 var baseIndex = (value - 1) * 4;
-                var secondaryColumnsUp = allSecondaryColumns[baseIndex];
-                rippleUpCoords.ForEach(coords => secondaryColumnsUp[coords.Y * numCols + coords.X] = 1);
 
-                var secondaryColumnsDown = allSecondaryColumns[baseIndex + 1];
-                rippleDownCoords.ForEach(coords => secondaryColumnsDown[coords.Y * numCols + coords.X] = 1);
+                var rippleUpSecondaryColumns = allRippleSecondaryColumns[baseIndex];
+                rippleUpCoords.ForEach(coords => rippleUpSecondaryColumns[coords.Y * numCols + coords.X] = 1);
 
-                var secondaryColumnsLeft = allSecondaryColumns[baseIndex + 2];
-                rippleLeftCoords.ForEach(coords => secondaryColumnsLeft[coords.Y * numCols + coords.X] = 1);
+                var rippleDownSecondaryColumns = allRippleSecondaryColumns[baseIndex + 1];
+                rippleDownCoords.ForEach(coords => rippleDownSecondaryColumns[coords.Y * numCols + coords.X] = 1);
 
-                var secondaryColumnsRight = allSecondaryColumns[baseIndex + 3];
-                rippleRightCoords.ForEach(coords => secondaryColumnsRight[coords.Y * numCols + coords.X] = 1);
+                var rippleLeftSecondaryColumns = allRippleSecondaryColumns[baseIndex + 2];
+                rippleLeftCoords.ForEach(coords => rippleLeftSecondaryColumns[coords.Y * numCols + coords.X] = 1);
 
-                return allSecondaryColumns;
+                var rippleRightSecondaryColumns = allRippleSecondaryColumns[baseIndex + 3];
+                rippleRightCoords.ForEach(coords => rippleRightSecondaryColumns[coords.Y * numCols + coords.X] = 1);
+
+                return allRippleSecondaryColumns;
             };
 
             var primaryColumns = new int[numRows * numCols];
             primaryColumns[row * numCols + col] = 1;
 
-            var scs = buildSecondaryColumns();
+            var rippleCoordsSecondaryColumns = buildRippleCoordsSecondaryColumns();
 
-            var allColumns = new[] {primaryColumns}.Concat(scs);
+            var numRooms = rooms.Count;
+            var roomsSecondaryColumns = new int[maxValue * numRooms];
+            roomsSecondaryColumns[roomIndex * maxValue + value - 1] = 1;
+
+            var allColumns = new[] {primaryColumns}.Concat(rippleCoordsSecondaryColumns).Concat(new[] {roomsSecondaryColumns});
 
             return allColumns
                 .SelectMany(columns => columns)
@@ -313,7 +335,7 @@ namespace RippleEffectDlxConsole
         private static void DumpRows(
             int numRows,
             int numCols,
-            IReadOnlyList<Tuple<Coords, int, bool>> internalRows,
+            IReadOnlyList<InternalRow> internalRows,
             IReadOnlyList<IImmutableList<int>> dlxRows)
         {
             for (var index = 0; index < internalRows.Count; index++)
@@ -327,7 +349,7 @@ namespace RippleEffectDlxConsole
         private static void DumpRow(
             int numRows,
             int numCols,
-            Tuple<Coords, int, bool> internalRow,
+            InternalRow internalRow,
             IReadOnlyCollection<int> dlxRow)
         {
             Console.WriteLine($"Coords: {internalRow.Item1}; Value: {internalRow.Item2}; DlxRow: {DlxRowToString(numRows, numCols, dlxRow)}");
@@ -338,17 +360,18 @@ namespace RippleEffectDlxConsole
             int numCols,
             IReadOnlyCollection<int> dlxRow)
         {
-            var totalNumBits = dlxRow.Count;
-            var chunkSize = numRows*numCols;
-            Debug.Assert(totalNumBits % chunkSize == 0);
-            var numChunks = totalNumBits/chunkSize;
-            var parts = new List<string>();
-            for (var index = 0; index < numChunks; index++)
-            {
-                var part = string.Join("", dlxRow.Skip(index * chunkSize).Take(chunkSize).Select(n => Convert.ToString(n)));
-                parts.Add(part);
-            }
-            return string.Join(" ", parts);
+            //var totalNumBits = dlxRow.Count;
+            //var chunkSize = numRows*numCols;
+            //Debug.Assert(totalNumBits % chunkSize == 0);
+            //var numChunks = totalNumBits/chunkSize;
+            //var parts = new List<string>();
+            //for (var index = 0; index < numChunks; index++)
+            //{
+            //    var part = string.Join("", dlxRow.Skip(index * chunkSize).Take(chunkSize).Select(n => Convert.ToString(n)));
+            //    parts.Add(part);
+            //}
+            //return string.Join(" ", parts);
+            return string.Empty;
         }
     }
 }
