@@ -159,8 +159,12 @@ namespace RippleEffectDlxConsole
 
             var dlxRows = BuildDlxRows(rooms, numRows, numCols, maxValue, internalRows);
 
+            var numRowColPrimaryColumns = numRows * numCols;
+            var numCellWithinRoomPrimaryColumns = rooms.Sum(r => r.Cells.Count);
+            var numPrimaryColumns = numRowColPrimaryColumns + numCellWithinRoomPrimaryColumns;
+
             var dlx = new Dlx();
-            var solutions = dlx.Solve(dlxRows, d => d, r => r, numRows*numCols).ToList();
+            var solutions = dlx.Solve(dlxRows, d => d, r => r, numPrimaryColumns).ToList();
             Console.WriteLine($"Number of solutions found: {solutions.Count}");
             var firstSolution = solutions.FirstOrDefault();
 
@@ -212,7 +216,7 @@ namespace RippleEffectDlxConsole
         }
 
         private static IImmutableList<int> BuildDlxRow(
-            IReadOnlyList<Room> rooms,
+            IReadOnlyCollection<Room> rooms,
             int numRows,
             int numCols,
             int maxValue,
@@ -229,7 +233,7 @@ namespace RippleEffectDlxConsole
             var value = internalRow.Item2;
             var roomIndex = internalRow.Item3;
 
-            Func<IEnumerable<int[]>> buildRippleCoordsSecondaryColumns = () =>
+            Func<IEnumerable<int[]>> buildSecondaryColumns = () =>
             {
                 var allRippleSecondaryColumns = Enumerable.Range(0, maxValue * 4).Select(_ => new int[numRows * numCols]).ToList();
 
@@ -270,16 +274,19 @@ namespace RippleEffectDlxConsole
                 return allRippleSecondaryColumns;
             };
 
-            var primaryColumns = new int[numRows * numCols];
-            primaryColumns[row * numCols + col] = 1;
+            var numRowColPrimaryColumns = numRows*numCols;
+            var rowColPrimaryColumns = new int[numRowColPrimaryColumns];
+            var rowColPrimaryColumnsIndex = row*numCols + col;
+            rowColPrimaryColumns[rowColPrimaryColumnsIndex] = 1;
 
-            var rippleCoordsSecondaryColumns = buildRippleCoordsSecondaryColumns();
+            var numCellWithinRoomPrimaryColumns = rooms.Sum(r => r.Cells.Count);
+            var cellWithinRoomPrimaryColumns = new int[numCellWithinRoomPrimaryColumns];
+            var cellWithinRoomPrimaryColumnsIndex = rooms.Take(roomIndex).Sum(r => r.Cells.Count) + value - 1;
+            cellWithinRoomPrimaryColumns[cellWithinRoomPrimaryColumnsIndex] = 1;
 
-            var numRooms = rooms.Count;
-            var roomsSecondaryColumns = new int[maxValue * numRooms];
-            roomsSecondaryColumns[roomIndex * maxValue + value - 1] = 1;
+            var secondaryColumns = buildSecondaryColumns();
 
-            var allColumns = new[] {primaryColumns}.Concat(rippleCoordsSecondaryColumns).Concat(new[] {roomsSecondaryColumns});
+            var allColumns = new[] { rowColPrimaryColumns, cellWithinRoomPrimaryColumns }.Concat(secondaryColumns);
 
             return allColumns
                 .SelectMany(columns => columns)
