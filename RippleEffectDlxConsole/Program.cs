@@ -12,7 +12,7 @@ namespace RippleEffectDlxConsole
         {
             var samplePuzzle = SamplePuzzles.SamplePuzzle1;
 
-            var initialGrid = InitialGrid(samplePuzzle);
+            var initialGrid = SamplePuzzleToGrid(samplePuzzle);
             Console.WriteLine("Puzzle:");
             initialGrid.Draw();
 
@@ -28,19 +28,19 @@ namespace RippleEffectDlxConsole
             }
         }
 
-        private static Grid InitialGrid(SamplePuzzle samplePuzzle)
+        private static Grid SamplePuzzleToGrid(SamplePuzzle samplePuzzle)
         {
             var rooms = samplePuzzle.Rooms;
             var initialValues = samplePuzzle.InitialValues;
 
-            var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Y) + 1;
-            var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.X) + 1;
+            var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Row) + 1;
+            var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.Col) + 1;
 
             var rows = Enumerable.Range(0, numRows).Select(_ => new string(' ', numCols)).ToList();
             foreach (var initialValue in initialValues)
             {
-                var row = initialValue.Item1.Y;
-                var col = initialValue.Item1.X;
+                var row = initialValue.Item1.Row;
+                var col = initialValue.Item1.Col;
                 var value = initialValue.Item2;
                 var s = rows[row];
                 var cs = s.ToCharArray();
@@ -56,8 +56,8 @@ namespace RippleEffectDlxConsole
             var rooms = samplePuzzle.Rooms;
             var initialValues = samplePuzzle.InitialValues;
 
-            var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Y) + 1;
-            var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.X) + 1;
+            var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Row) + 1;
+            var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.Col) + 1;
             var maxValue = rooms.Max(r => r.Cells.Count);
 
             var internalRows1 = rooms.SelectMany(room => BuildInternalRowsForRoom(rooms, initialValues, room));
@@ -78,7 +78,7 @@ namespace RippleEffectDlxConsole
             if (firstSolution == null) return null;
 
             var subsetOfInternalRows = firstSolution.RowIndexes.Select(idx => internalRows[idx]).ToImmutableList();
-            var orderedSubsetOfInternalRows = subsetOfInternalRows.OrderBy(t => t.Item1.Y).ThenBy(t => t.Item1.X);
+            var orderedSubsetOfInternalRows = subsetOfInternalRows.OrderBy(t => t.Item1.Row).ThenBy(t => t.Item1.Col);
             var rowStrings = Enumerable.Range(0, numRows).Select(row => string.Join("", orderedSubsetOfInternalRows.Skip(row * numCols).Take(numRows).Select(t => t.Item2)));
             var grid = new Grid(rowStrings.ToImmutableList());
             return grid;
@@ -86,11 +86,11 @@ namespace RippleEffectDlxConsole
 
         private static IEnumerable<InternalRow> BuildInternalRowsForRoom(IReadOnlyList<Room> rooms, IImmutableList<InitialValue> initialValues, Room room)
         {
-            var ivCoords = initialValues.Select(iv => iv.Item1);
-            var ivValuesInThisRoom = initialValues.Where(t => room.Cells.Contains(t.Item1)).Select(iv => iv.Item2);
+            var cellsWithInitialValues = initialValues.Select(initialValue => initialValue.Item1);
+            var initialValuesInThisRoom = initialValues.Where(initialValue => room.Cells.Contains(initialValue.Item1)).Select(initialValue => initialValue.Item2);
 
-            var cellsRemaining = room.Cells.Except(ivCoords).ToImmutableList();
-            var valuesRemaining = Enumerable.Range(1, room.Cells.Count).Except(ivValuesInThisRoom).ToImmutableList();
+            var cellsRemaining = room.Cells.Except(cellsWithInitialValues).ToImmutableList();
+            var valuesRemaining = Enumerable.Range(1, room.Cells.Count).Except(initialValuesInThisRoom).ToImmutableList();
 
             return
                 from cell in cellsRemaining
@@ -98,10 +98,10 @@ namespace RippleEffectDlxConsole
                 select BuildInternalRow(rooms, cell, value, false);
         }
 
-        private static InternalRow BuildInternalRow(IReadOnlyList<Room> rooms, Coords coords, int value, bool isFixed)
+        private static InternalRow BuildInternalRow(IReadOnlyList<Room> rooms, Coords coords, int value, bool isInitialValue)
         {
             var roomIndex = GetRoomIndexForCoords(rooms, coords);
-            return new InternalRow(coords, value, roomIndex, isFixed);
+            return new InternalRow(coords, value, roomIndex, isInitialValue);
         }
 
         private static int GetRoomIndexForCoords(IReadOnlyList<Room> rooms, Coords coords)
@@ -130,13 +130,13 @@ namespace RippleEffectDlxConsole
             InternalRow internalRow)
         {
             Func<Coords, bool> isValidRowCol = coords =>
-                coords.X >= 0 && coords.X < numCols &&
-                coords.Y >= 0 && coords.Y < numRows;
+                coords.Col >= 0 && coords.Col < numCols &&
+                coords.Row >= 0 && coords.Row < numRows;
 
             var localIsValidRowCol = isValidRowCol;
 
-            var row = internalRow.Item1.Y;
-            var col = internalRow.Item1.X;
+            var row = internalRow.Item1.Row;
+            var col = internalRow.Item1.Col;
             var value = internalRow.Item2;
             var roomIndex = internalRow.Item3;
 
@@ -145,38 +145,38 @@ namespace RippleEffectDlxConsole
                 var allRippleSecondaryColumns = Enumerable.Range(0, maxValue * 4).Select(_ => new int[numRows * numCols]).ToList();
 
                 var rippleUpCoords = Enumerable.Range(row, value + 1)
-                    .Select(r => new Coords(col, r))
+                    .Select(r => new Coords(r, col))
                     .Where(localIsValidRowCol)
                     .ToList();
 
                 var rippleDownCoords = Enumerable.Range(row - value, value + 1)
-                    .Select(r => new Coords(col, r))
+                    .Select(r => new Coords(r, col))
                     .Where(localIsValidRowCol)
                     .ToList();
 
                 var rippleLeftCoords = Enumerable.Range(col - value, value + 1)
-                    .Select(c => new Coords(c, row))
+                    .Select(c => new Coords(row, c))
                     .Where(localIsValidRowCol)
                     .ToList();
 
                 var rippleRightCoords = Enumerable.Range(col, value + 1)
-                    .Select(c => new Coords(c, row))
+                    .Select(c => new Coords(row, c))
                     .Where(localIsValidRowCol)
                     .ToList();
 
                 var baseIndex = (value - 1) * 4;
 
                 var rippleUpSecondaryColumns = allRippleSecondaryColumns[baseIndex];
-                rippleUpCoords.ForEach(coords => rippleUpSecondaryColumns[coords.Y * numCols + coords.X] = 1);
+                rippleUpCoords.ForEach(coords => rippleUpSecondaryColumns[coords.Row * numCols + coords.Col] = 1);
 
                 var rippleDownSecondaryColumns = allRippleSecondaryColumns[baseIndex + 1];
-                rippleDownCoords.ForEach(coords => rippleDownSecondaryColumns[coords.Y * numCols + coords.X] = 1);
+                rippleDownCoords.ForEach(coords => rippleDownSecondaryColumns[coords.Row * numCols + coords.Col] = 1);
 
                 var rippleLeftSecondaryColumns = allRippleSecondaryColumns[baseIndex + 2];
-                rippleLeftCoords.ForEach(coords => rippleLeftSecondaryColumns[coords.Y * numCols + coords.X] = 1);
+                rippleLeftCoords.ForEach(coords => rippleLeftSecondaryColumns[coords.Row * numCols + coords.Col] = 1);
 
                 var rippleRightSecondaryColumns = allRippleSecondaryColumns[baseIndex + 3];
-                rippleRightCoords.ForEach(coords => rippleRightSecondaryColumns[coords.Y * numCols + coords.X] = 1);
+                rippleRightCoords.ForEach(coords => rippleRightSecondaryColumns[coords.Row * numCols + coords.Col] = 1);
 
                 return allRippleSecondaryColumns;
             };

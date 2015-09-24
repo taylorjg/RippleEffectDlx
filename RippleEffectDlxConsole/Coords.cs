@@ -2,18 +2,20 @@
 {
     public class Coords
     {
-        public Coords(int x, int y)
+        public Coords(int row, int col)
         {
-            X = x;
-            Y = y;
+            Row = row;
+            Col = col;
         }
 
-        public int X { get; }
-        public int Y { get; }
+        public int Row { get; }
+        public int Col { get; }
 
         public override string ToString()
         {
-            return $"({X}, {Y})";
+            var x = Col;
+            var y = Row;
+            return $"({x}, {y})";
         }
 
         public override bool Equals(object obj)
@@ -22,7 +24,7 @@
             if (ReferenceEquals(this, obj)) return true;
             var other = obj as Coords;
             if (other == null) return false;
-            return X == other.X && Y == other.Y;
+            return Row == other.Row && Col == other.Col;
         }
 
         public override int GetHashCode()
@@ -30,8 +32,8 @@
             unchecked
             {
                 var hash = 17;
-                hash = hash * 23 + X.GetHashCode();
-                hash = hash * 23 + Y.GetHashCode();
+                hash = hash * 23 + Row.GetHashCode();
+                hash = hash * 23 + Col.GetHashCode();
                 return hash;
             }
         }

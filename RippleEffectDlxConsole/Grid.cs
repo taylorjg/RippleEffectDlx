@@ -34,11 +34,6 @@ namespace RippleEffectDlxConsole
             _rows = rows.ToImmutableList();
         }
 
-        public int ValueAt(int row, int col)
-        {
-            return _rows[row][col];
-        }
-
         public void Draw()
         {
             foreach (var row in _rows.Reverse()) DrawRow(row);
