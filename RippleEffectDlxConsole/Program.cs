@@ -13,13 +13,15 @@ namespace RippleEffectDlxConsole
     {
         private static void Main()
         {
-            var initialGrid = InitialGrid(SamplePuzzle.Rooms, SamplePuzzle.InitialValues);
+            var samplePuzzle = SamplePuzzles.SamplePuzzle1;
+
+            var initialGrid = InitialGrid(samplePuzzle);
             Console.WriteLine("Puzzle:");
             initialGrid.Draw();
 
             Console.WriteLine();
 
-            var firstSolutionGrid = Solve(SamplePuzzle.Rooms, SamplePuzzle.InitialValues);
+            var firstSolutionGrid = Solve(samplePuzzle);
             Console.WriteLine();
 
             if (firstSolutionGrid != null)
@@ -29,8 +31,11 @@ namespace RippleEffectDlxConsole
             }
         }
 
-        private static Grid InitialGrid(IImmutableList<Room> rooms, IEnumerable<InitialValue> initialValues)
+        private static Grid InitialGrid(SamplePuzzle samplePuzzle)
         {
+            var rooms = samplePuzzle.Rooms;
+            var initialValues = samplePuzzle.InitialValues;
+
             var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Y) + 1;
             var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.X) + 1;
 
@@ -49,8 +54,11 @@ namespace RippleEffectDlxConsole
             return new Grid(rows.ToImmutableList());
         }
 
-        private static Grid Solve(IReadOnlyList<Room> rooms, IImmutableList<InitialValue> initialValues)
+        private static Grid Solve(SamplePuzzle samplePuzzle)
         {
+            var rooms = samplePuzzle.Rooms;
+            var initialValues = samplePuzzle.InitialValues;
+
             var numRows = rooms.SelectMany(r => r.Cells).Max(c => c.Y) + 1;
             var numCols = rooms.SelectMany(r => r.Cells).Max(c => c.X) + 1;
             var maxValue = rooms.Max(r => r.Cells.Count);

@@ -53,6 +53,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Room.cs" />
     <Compile Include="SamplePuzzle.cs" />
+    <Compile Include="SamplePuzzle1.cs" />
+    <Compile Include="SamplePuzzles.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
