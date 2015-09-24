@@ -6,9 +6,6 @@ using DlxLib;
 
 namespace RippleEffectDlxConsole
 {
-    using InternalRow = Tuple<Coords, int, int, bool>;
-    using InitialValue = Tuple<Coords, int>;
-
     internal static class Program
     {
         private static void Main()
@@ -104,7 +101,7 @@ namespace RippleEffectDlxConsole
         private static InternalRow BuildInternalRow(IReadOnlyList<Room> rooms, Coords coords, int value, bool isFixed)
         {
             var roomIndex = GetRoomIndexForCoords(rooms, coords);
-            return Tuple.Create(coords, value, roomIndex, isFixed);
+            return new InternalRow(coords, value, roomIndex, isFixed);
         }
 
         private static int GetRoomIndexForCoords(IReadOnlyList<Room> rooms, Coords coords)

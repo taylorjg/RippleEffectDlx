@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 namespace RippleEffectDlxConsole
 {
-    using InitialValue = Tuple<Coords, int>;
-
     public static partial class SamplePuzzles
     {
         private static readonly IImmutableList<Room> SamplePuzzle1Rooms = ImmutableList.Create(

@@ -49,6 +49,8 @@
   <ItemGroup>
     <Compile Include="Coords.cs" />
     <Compile Include="Grid.cs" />
+    <Compile Include="InitialValue.cs" />
+    <Compile Include="InternalRow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Room.cs" />
