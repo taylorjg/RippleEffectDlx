@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-//using System.Diagnostics;
 using System.Linq;
 using DlxLib;
 
@@ -14,144 +13,103 @@ namespace RippleEffectDlxConsole
     {
         private static void Main()
         {
-            //var rooms = ImmutableList.Create(
-            //    new Room(
-            //        new Coords(0, 0),
-            //        new Coords(1, 0)),
-            //    new Room(
-            //        new Coords(2, 1),
-            //        new Coords(2, 0),
-            //        new Coords(3, 0),
-            //        new Coords(4, 0)),
-            //    new Room(
-            //        new Coords(5, 0),
-            //        new Coords(6, 0),
-            //        new Coords(7, 0),
-            //        new Coords(7, 1)),
-            //    new Room(
-            //        new Coords(0, 1),
-            //        new Coords(0, 2)),
-            //    new Room(
-            //        new Coords(1, 1)),
-            //    new Room(
-            //        new Coords(3, 2)),
-            //    new Room(
-            //        new Coords(3, 1),
-            //        new Coords(4, 1),
-            //        new Coords(4, 2),
-            //        new Coords(4, 3),
-            //        new Coords(3, 3)),
-            //    new Room(
-            //        new Coords(5, 1),
-            //        new Coords(6, 1),
-            //        new Coords(6, 2),
-            //        new Coords(7, 2)),
-            //    new Room(
-            //        new Coords(0, 3),
-            //        new Coords(1, 3),
-            //        new Coords(1, 2),
-            //        new Coords(1, 4),
-            //        new Coords(2, 4)),
-            //    new Room(
-            //        new Coords(2, 2),
-            //        new Coords(2, 3)),
-            //    new Room(
-            //        new Coords(3, 4),
-            //        new Coords(3, 5),
-            //        new Coords(3, 6),
-            //        new Coords(4, 5)),
-            //    new Room(
-            //        new Coords(4, 4),
-            //        new Coords(5, 4),
-            //        new Coords(5, 3),
-            //        new Coords(5, 2),
-            //        new Coords(6, 3)),
-            //    new Room(
-            //        new Coords(6, 4),
-            //        new Coords(7, 5),
-            //        new Coords(7, 4),
-            //        new Coords(7, 3)),
-            //    new Room(
-            //        new Coords(0, 7)),
-            //    new Room(
-            //        new Coords(1, 7),
-            //        new Coords(1, 6)),
-            //    new Room(
-            //        new Coords(4, 6),
-            //        new Coords(5, 6)),
-            //    new Room(
-            //        new Coords(5, 5),
-            //        new Coords(6, 5)),
-            //    new Room(
-            //        new Coords(2, 7),
-            //        new Coords(3, 7),
-            //        new Coords(4, 7)),
-            //    new Room(
-            //        new Coords(7, 6)),
-            //    new Room(
-            //        new Coords(0, 4),
-            //        new Coords(0, 5),
-            //        new Coords(0, 6),
-            //        new Coords(1, 5)),
-            //    new Room(
-            //        new Coords(2, 6),
-            //        new Coords(2, 5)),
-            //    new Room(
-            //        new Coords(5, 7),
-            //        new Coords(6, 7),
-            //        new Coords(7, 7),
-            //        new Coords(6, 6)));
-
-            //var initialValues = ImmutableList.Create(
-            //    Tuple.Create(new Coords(4, 0), 2),
-            //    Tuple.Create(new Coords(1, 2), 3),
-            //    Tuple.Create(new Coords(2, 3), 1),
-            //    Tuple.Create(new Coords(4, 3), 5),
-            //    Tuple.Create(new Coords(3, 4), 1),
-            //    Tuple.Create(new Coords(5, 4), 3),
-            //    Tuple.Create(new Coords(6, 5), 2),
-            //    Tuple.Create(new Coords(3, 7), 3));
-
-            // http://www.sachsentext.de/gif/ripple_effect1.gif
             var rooms = ImmutableList.Create(
                 new Room(
-                    new Coords(0, 3),
-                    new Coords(0, 2),
-                    new Coords(0, 1),
                     new Coords(0, 0),
                     new Coords(1, 0)),
                 new Room(
-                    new Coords(1, 1),
                     new Coords(2, 1),
-                    new Coords(3, 1),
-                    new Coords(2, 0)),
-                new Room(
+                    new Coords(2, 0),
                     new Coords(3, 0),
-                    new Coords(4, 0),
+                    new Coords(4, 0)),
+                new Room(
+                    new Coords(5, 0),
+                    new Coords(6, 0),
+                    new Coords(7, 0),
+                    new Coords(7, 1)),
+                new Room(
+                    new Coords(0, 1),
+                    new Coords(0, 2)),
+                new Room(
+                    new Coords(1, 1)),
+                new Room(
+                    new Coords(3, 2)),
+                new Room(
+                    new Coords(3, 1),
                     new Coords(4, 1),
                     new Coords(4, 2),
-                    new Coords(4, 3)),
+                    new Coords(4, 3),
+                    new Coords(3, 3)),
+                new Room(
+                    new Coords(5, 1),
+                    new Coords(6, 1),
+                    new Coords(6, 2),
+                    new Coords(7, 2)),
+                new Room(
+                    new Coords(0, 3),
+                    new Coords(1, 3),
+                    new Coords(1, 2),
+                    new Coords(1, 4),
+                    new Coords(2, 4)),
+                new Room(
+                    new Coords(2, 2),
+                    new Coords(2, 3)),
+                new Room(
+                    new Coords(3, 4),
+                    new Coords(3, 5),
+                    new Coords(3, 6),
+                    new Coords(4, 5)),
+                new Room(
+                    new Coords(4, 4),
+                    new Coords(5, 4),
+                    new Coords(5, 3),
+                    new Coords(5, 2),
+                    new Coords(6, 3)),
+                new Room(
+                    new Coords(6, 4),
+                    new Coords(7, 5),
+                    new Coords(7, 4),
+                    new Coords(7, 3)),
+                new Room(
+                    new Coords(0, 7)),
+                new Room(
+                    new Coords(1, 7),
+                    new Coords(1, 6)),
+                new Room(
+                    new Coords(4, 6),
+                    new Coords(5, 6)),
+                new Room(
+                    new Coords(5, 5),
+                    new Coords(6, 5)),
+                new Room(
+                    new Coords(2, 7),
+                    new Coords(3, 7),
+                    new Coords(4, 7)),
+                new Room(
+                    new Coords(7, 6)),
                 new Room(
                     new Coords(0, 4),
-                    new Coords(1, 4),
-                    new Coords(1, 3),
-                    new Coords(1, 2)),
+                    new Coords(0, 5),
+                    new Coords(0, 6),
+                    new Coords(1, 5)),
                 new Room(
-                    new Coords(3, 2),
-                    new Coords(3, 3),
-                    new Coords(3, 4),
-                    new Coords(4, 4)),
+                    new Coords(2, 6),
+                    new Coords(2, 5)),
                 new Room(
-                    new Coords(2, 4),
-                    new Coords(2, 3),
-                    new Coords(2, 2)));
+                    new Coords(5, 7),
+                    new Coords(6, 7),
+                    new Coords(7, 7),
+                    new Coords(6, 6)));
 
             var initialValues = ImmutableList.Create(
-                Tuple.Create(new Coords(0, 0), 1),
-                Tuple.Create(new Coords(4, 0), 4),
-                Tuple.Create(new Coords(2, 2), 2),
-                Tuple.Create(new Coords(0, 4), 1),
-                Tuple.Create(new Coords(4, 4), 1));
+                Tuple.Create(new Coords(4, 0), 2),
+                Tuple.Create(new Coords(1, 2), 3),
+                Tuple.Create(new Coords(2, 3), 1),
+                Tuple.Create(new Coords(4, 3), 5),
+                Tuple.Create(new Coords(3, 4), 1),
+                Tuple.Create(new Coords(5, 4), 3),
+                Tuple.Create(new Coords(6, 5), 2),
+                Tuple.Create(new Coords(3, 7), 3));
 
             var initialGrid = InitialGrid(rooms, initialValues);
             Console.WriteLine("Puzzle:");
@@ -201,8 +159,6 @@ namespace RippleEffectDlxConsole
 
             var dlxRows = BuildDlxRows(rooms, numRows, numCols, maxValue, internalRows);
 
-            //DumpRows(numRows, numCols, internalRows, dlxRows);
-
             var dlx = new Dlx();
             var solutions = dlx.Solve(dlxRows, d => d, r => r, numRows*numCols).ToList();
             Console.WriteLine($"Number of solutions found: {solutions.Count}");
@@ -211,8 +167,6 @@ namespace RippleEffectDlxConsole
             if (firstSolution == null) return null;
 
             var subsetOfInternalRows = firstSolution.RowIndexes.Select(idx => internalRows[idx]).ToImmutableList();
-            //var subsetOfDlxRows = solution.RowIndexes.Select(idx => dlxRows[idx]).ToImmutableList();
-            //DumpRows(numRows, numCols, subsetOfInternalRows, subsetOfDlxRows);
             var orderedSubsetOfInternalRows = subsetOfInternalRows.OrderBy(t => t.Item1.Y).ThenBy(t => t.Item1.X);
             var rowStrings = Enumerable.Range(0, numRows).Select(row => string.Join("", orderedSubsetOfInternalRows.Skip(row * numCols).Take(numRows).Select(t => t.Item2)));
             var grid = new Grid(rowStrings.ToImmutableList());
@@ -330,48 +284,6 @@ namespace RippleEffectDlxConsole
             return allColumns
                 .SelectMany(columns => columns)
                 .ToImmutableList();
-        }
-
-        private static void DumpRows(
-            int numRows,
-            int numCols,
-            IReadOnlyList<InternalRow> internalRows,
-            IReadOnlyList<IImmutableList<int>> dlxRows)
-        {
-            for (var index = 0; index < internalRows.Count; index++)
-            {
-                var internalRow = internalRows[index];
-                var dlxRow = dlxRows[index];
-                DumpRow(numRows, numCols, internalRow, dlxRow);
-            }
-        }
-
-        private static void DumpRow(
-            int numRows,
-            int numCols,
-            InternalRow internalRow,
-            IReadOnlyCollection<int> dlxRow)
-        {
-            Console.WriteLine($"Coords: {internalRow.Item1}; Value: {internalRow.Item2}; DlxRow: {DlxRowToString(numRows, numCols, dlxRow)}");
-        }
-
-        private static string DlxRowToString(
-            int numRows,
-            int numCols,
-            IReadOnlyCollection<int> dlxRow)
-        {
-            //var totalNumBits = dlxRow.Count;
-            //var chunkSize = numRows*numCols;
-            //Debug.Assert(totalNumBits % chunkSize == 0);
-            //var numChunks = totalNumBits/chunkSize;
-            //var parts = new List<string>();
-            //for (var index = 0; index < numChunks; index++)
-            //{
-            //    var part = string.Join("", dlxRow.Skip(index * chunkSize).Take(chunkSize).Select(n => Convert.ToString(n)));
-            //    parts.Add(part);
-            //}
-            //return string.Join(" ", parts);
-            return string.Empty;
         }
     }
 }
