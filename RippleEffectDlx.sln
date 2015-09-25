@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RippleEffectDlxConsole", "R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DlxLib", "..\DlxLib\DlxLib\DlxLib.csproj", "{C46D0463-53E5-4782-B4F8-50CDC2A933F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RippleEffectDlxWpf", "RippleEffectDlxWpf\RippleEffectDlxWpf.csproj", "{0BF54B83-063B-4DE3-8037-FF1000914B3F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C46D0463-53E5-4782-B4F8-50CDC2A933F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C46D0463-53E5-4782-B4F8-50CDC2A933F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C46D0463-53E5-4782-B4F8-50CDC2A933F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BF54B83-063B-4DE3-8037-FF1000914B3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BF54B83-063B-4DE3-8037-FF1000914B3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BF54B83-063B-4DE3-8037-FF1000914B3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BF54B83-063B-4DE3-8037-FF1000914B3F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
