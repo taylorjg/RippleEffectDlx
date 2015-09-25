@@ -2,10 +2,18 @@
 ## Description
 
 I was [recently contacted ](https://github.com/taylorjg/DlxLib/pull/2)
-by somebody with reference to (the lack of) support for secondary columns in [my implementation](https://github.com/taylorjg/DlxLib)
-of [DLX](https://en.wikipedia.org/wiki/Dancing_Links). I must confess that I did not make it to the end of the [original paper](http://arxiv.org/pdf/cs/0011047v1.pdf). I am now in the process of adding this support to DlxLib. As such, I thought I would try to solve [Ripple Effect](https://en.wikipedia.org/wiki/Ripple_Effect_(puzzle)) puzzles because this is what motivated the person mentioned above. It took me a while to figure out how to do this but I finally got there.
+by somebody with reference to (the lack of) support for secondary columns in
+[my implementation](https://github.com/taylorjg/DlxLib)
+of [DLX](https://en.wikipedia.org/wiki/Dancing_Links). I must confess that I did
+not make it to the end of the [original paper](http://arxiv.org/pdf/cs/0011047v1.pdf).
+I am now in the process of adding this support to
+[DlxLib](https://github.com/taylorjg/DlxLib). As such, I thought I would try to solve
+[Ripple Effect](https://en.wikipedia.org/wiki/Ripple_Effect_(puzzle)) puzzles because
+this is what motivated the person mentioned above.
+It took me a while to figure out how to do this but I finally got there.
 
-I also have another project which makes use of secondary columns - see [TetraSticks](https://github.com/taylorjg/TetraSticks).
+I also have another project which makes use of secondary columns - see
+[TetraSticks](https://github.com/taylorjg/TetraSticks).
 
 ## Details of the DLX Matrix
 
@@ -29,7 +37,8 @@ contain a mixture of 1s, 2s, 3s, 4s and 5s. In this case, we will
 have 4 x 5 = 20 sets of secondary columns. The number of columns
 in each set of secondary columns will be numRows x numCols. These sets
 of secondary columns are used to enforce the proximity constraints.
-This is best explained using an example. Say we have a 5 x 5 grid with position (0, 0) at bottom left. Lets say that we have a 2 at (1, 3):
+This is best explained using an example. Say we have a 5 x 5 grid with
+position (0, 0) at bottom left. Lets say that we have a 2 at (1, 3):
 
 ```
 -----
@@ -94,7 +103,8 @@ the positions to the right that must not contain another 2:
 I refer to these up/down/left/right values as the 'ripples' caused by
 placing a value. Maybe this is why they are called Ripple Effect puzzles ?
 
-Of the 20 sets of secondary columns, only 4 of them will be populated in any particular row. The other 16 sets of secondary columns will be filled
+Of the 20 sets of secondary columns, only 4 of them will be populated in any particular row.
+The other 16 sets of secondary columns will be filled
 with 0s. So in other words, we have a set of secondary columns for each of the following:
 
 * the up/down/left/right ripples of placed 1s
@@ -105,18 +115,20 @@ with 0s. So in other words, we have a set of secondary columns for each of the f
 
 ## Screenshot
 
-Here is an example Ripple Effect puzzle:
+There is a [Ripple Effect Tutorial](http://www.nikoli.co.jp/en/puzzles/ripple_effect.html).
+This is a screen grab of the puzzle used in the tutorial:
 
-![Example Ripple Puzzle](http://www.sachsentext.de/gif/ripple_effect1.gif)
+![RippleEffectTutorial](https://raw.github.com/taylorjg/RippleEffectDlx/master/Images/RippleEffectTutorial.png)
 
-Here is a screenshot showing my RippleEffectDlxConsole program solving the above puzzle:
+This is a screenshot of RippleEffectDlxConsole solving the above puzzle:
 
 ![Screenshot](https://raw.github.com/taylorjg/RippleEffectDlx/master/Images/Screenshot.png)
 
 ## Future Plans
 
-I have a quick and dirty console app that proves that this type of puzzle
-can be solved using DLX with secondary columns. My next goal is to write a WPF app that visualises each step of the algorithm as it solves the puzzle.
+I now have a quick and dirty console app that proves that this type of puzzle
+can be solved using [DLX](https://en.wikipedia.org/wiki/Dancing_Links) with secondary columns.
+My next goal is to write a WPF app that visualises each step of the algorithm as it solves the puzzle.
 
 ## Links
 
