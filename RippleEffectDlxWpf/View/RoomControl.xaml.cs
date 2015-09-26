@@ -15,8 +15,8 @@ namespace RippleEffectDlxWpf.View
         private readonly int _numRows;
         private readonly double _sw;
         private readonly double _sh;
-        private const double OuterCellLineWidth = 4; // half of this width will be clipped away
-        private const double InnerCellLineWidth = OuterCellLineWidth / 2;
+        private const double OuterCellLineWidth = 4;
+        private const double InnerCellLineWidth = OuterCellLineWidth / 4;
         private readonly Color _cellColour = Colors.White;
         private readonly Color _roomBorderColour = Colors.Black;
 
@@ -40,6 +40,25 @@ namespace RippleEffectDlxWpf.View
                 rectangle.Fill = new SolidColorBrush(_cellColour);
                 RoomCanvas.Children.Add(rectangle);
                 DetermineEdges(insideEdges, outsideEdges, room.Cells, cell.Col, cell.Row);
+            }
+
+            // TODO: we should probably de-dup insideEdges.
+            // e.g. [(1, 1), (1, 0), (1, 0), (1, 1)] => [(1, 1), (1, 0)]
+            var insideEdgeLinePoints = CalculateEdgeLinePoints(insideEdges);
+            for (var i = 0; i < insideEdgeLinePoints.Count/2; i++)
+            {
+                var pt1 = insideEdgeLinePoints[i * 2];
+                var pt2 = insideEdgeLinePoints[i * 2 + 1];
+                var line = new Line
+                {
+                    X1 = pt1.X,
+                    Y1 = pt1.Y,
+                    X2 = pt2.X,
+                    Y2 = pt2.Y,
+                    Stroke = new SolidColorBrush(_roomBorderColour),
+                    StrokeThickness = InnerCellLineWidth
+                };
+                RoomCanvas.Children.Add(line);
             }
 
             var combinedOutsideEdges = CombineOutsideEdges(outsideEdges);
@@ -79,6 +98,7 @@ namespace RippleEffectDlxWpf.View
             var bottomEdge = cells.Min(c => c.Row);
             var leftEdge = cells.Min(c => c.Col);
             var rightEdge = cells.Max(c => c.Col) + 1;
+            ICollection<Coords> edges;
 
             Func<int, int, bool> roomHasCellAt = (col, row) => cells.Contains(new Coords(row, col));
 
@@ -100,30 +120,9 @@ namespace RippleEffectDlxWpf.View
                                 isOutsideEdge = true;
                             }
                         }
-                        if (isOutsideEdge)
-                        {
-                            outsideEdges.Add(new Coords(y + 1, x));
-                            outsideEdges.Add(new Coords(y + 1, x + 1));
-                        }
-                        break;
-
-                    case Side.Right:
-                        if (x + 1 >= rightEdge)
-                        {
-                            isOutsideEdge = true;
-                        }
-                        else
-                        {
-                            if (!roomHasCellAt(x + 1, y))
-                            {
-                                isOutsideEdge = true;
-                            }
-                        }
-                        if (isOutsideEdge)
-                        {
-                            outsideEdges.Add(new Coords(y + 1, x + 1));
-                            outsideEdges.Add(new Coords(y, x + 1));
-                        }
+                        edges = isOutsideEdge ? outsideEdges : insideEdges;
+                        edges.Add(new Coords(y + 1, x));
+                        edges.Add(new Coords(y + 1, x + 1));
                         break;
 
                     case Side.Bottom:
@@ -138,11 +137,9 @@ namespace RippleEffectDlxWpf.View
                                 isOutsideEdge = true;
                             }
                         }
-                        if (isOutsideEdge)
-                        {
-                            outsideEdges.Add(new Coords(y, x + 1));
-                            outsideEdges.Add(new Coords(y, x));
-                        }
+                        edges = isOutsideEdge ? outsideEdges : insideEdges;
+                        edges.Add(new Coords(y, x + 1));
+                        edges.Add(new Coords(y, x));
                         break;
 
                     case Side.Left:
@@ -157,11 +154,26 @@ namespace RippleEffectDlxWpf.View
                                 isOutsideEdge = true;
                             }
                         }
-                        if (isOutsideEdge)
+                        edges = isOutsideEdge ? outsideEdges : insideEdges;
+                        edges.Add(new Coords(y, x));
+                        edges.Add(new Coords(y + 1, x));
+                        break;
+
+                    case Side.Right:
+                        if (x + 1 >= rightEdge)
                         {
-                            outsideEdges.Add(new Coords(y, x));
-                            outsideEdges.Add(new Coords(y + 1, x));
+                            isOutsideEdge = true;
                         }
+                        else
+                        {
+                            if (!roomHasCellAt(x + 1, y))
+                            {
+                                isOutsideEdge = true;
+                            }
+                        }
+                        edges = isOutsideEdge ? outsideEdges : insideEdges;
+                        edges.Add(new Coords(y + 1, x + 1));
+                        edges.Add(new Coords(y, x + 1));
                         break;
                 }
             }
@@ -219,9 +231,9 @@ namespace RippleEffectDlxWpf.View
             throw new InvalidOperationException("FindNextLine failed to find the next line!");
         }
 
-        private IList<Point> CalculateEdgeLinePoints(IEnumerable<Coords> combinedOutsideEdges)
+        private IList<Point> CalculateEdgeLinePoints(IEnumerable<Coords> edges)
         {
-            return combinedOutsideEdges.Select(coords => new Point
+            return edges.Select(coords => new Point
             {
                 X = coords.Col * _sw,
                 Y = (_numRows - coords.Row) * _sh
