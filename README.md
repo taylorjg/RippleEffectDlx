@@ -130,6 +130,19 @@ I now have a quick and dirty console app that proves that this type of puzzle
 can be solved using [DLX](https://en.wikipedia.org/wiki/Dancing_Links) with secondary columns.
 My next goal is to write a WPF app that visualises each step of the algorithm as it solves the puzzle.
 
+## WPF App TODO List
+
+* ~~Get basic window working with background and grid~~
+* ~~Draw the cells of a room~~
+* Draw the border around a room
+* Draw a number in a cell
+* Draw an initial value in a cell (like drawing a number but needs to look slightly different)
+* Add a Solve button
+* Add code to solve the puzzle on a different thread
+* Render the solution
+* Render the search steps
+* Add the ability to cancel the solving operation
+
 ## Links
 
 * https://en.wikipedia.org/wiki/Ripple_Effect_(puzzle)
