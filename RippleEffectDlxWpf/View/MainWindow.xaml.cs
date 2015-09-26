@@ -1,10 +1,15 @@
-﻿namespace RippleEffectDlxWpf
+﻿namespace RippleEffectDlxWpf.View
 {
     public partial class MainWindow
     {
         public MainWindow()
         {
             InitializeComponent();
+
+            ContentRendered += (_, __) =>
+            {
+                BoardControl.DrawGrid(8, 8);
+            };
         }
     }
 }

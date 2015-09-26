@@ -1,16 +1,24 @@
-﻿<Window x:Class="RippleEffectDlxWpf.MainWindow"
+﻿<Window x:Class="RippleEffectDlxWpf.View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:RippleEffectDlxWpf"
-        mc:Ignorable="d"
-        Title="Ripple Puzzle Solver"
+        xmlns:view="clr-namespace:RippleEffectDlxWpf.View"
+        Title="Ripple Effect Puzzle Solver"
         ResizeMode="CanMinimize"
-        Height="350"
-        Width="525">
-    
+        Height="690"
+        Width="780"
+        WindowStartupLocation="CenterScreen"
+        >
+
+    <Window.Background>
+        <VisualBrush TileMode="Tile" Viewport="0,0,0.2,0.2">
+            <VisualBrush.Visual>
+                <Image Source="..\Assets\Pattern - Apple Wood@2x.png" />
+            </VisualBrush.Visual>
+        </VisualBrush>
+    </Window.Background>
+
     <Grid>
+        <view:BoardControl x:Name="BoardControl" Width="544" Height="544" />
     </Grid>
-    
+
 </Window>
