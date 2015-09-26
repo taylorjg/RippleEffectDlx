@@ -12,11 +12,8 @@ namespace RippleEffectDlxWpf.View
     public partial class BoardControl : IBoardControl
     {
         private readonly Color _gridColour = Color.FromArgb(0x80, 0xCD, 0x85, 0x3F);
-        private readonly Color _cellColour = Colors.White;
-        private readonly Color _roomBorderColour = Colors.Black;
         private const int GridLineThickness = 4;
         private const int GridLineHalfThickness = GridLineThickness / 2;
-        private const double BorderWidth = 8; // half of this width will be clipped away
         private double _sw;
         private double _sh;
         private int _numRows;
@@ -24,8 +21,7 @@ namespace RippleEffectDlxWpf.View
         private enum TagType
         {
             GridLine,
-            Cell,
-            RoomBorder,
+            Room,
             InitialValue,
             Digit
         }
@@ -33,6 +29,15 @@ namespace RippleEffectDlxWpf.View
         public BoardControl()
         {
             InitializeComponent();
+        }
+
+        public void DrawGrid(int numRows, int numCols)
+        {
+            _numRows = numRows;
+            _sw = (ActualWidth - GridLineThickness) / numCols;
+            _sh = (ActualHeight - GridLineThickness) / numRows;
+
+            DrawGridLines(numRows, numCols);
         }
 
         public void DrawRooms(IImmutableList<Room> rooms)
@@ -43,19 +48,10 @@ namespace RippleEffectDlxWpf.View
 
         private void DrawRoom(Room room)
         {
-            // Draw a white square for each cell
-            foreach (var cell in room.Cells)
-            {
-                var rect = new Rect(cell.Col * _sw + GridLineHalfThickness, (_numRows - cell.Row - 1) * _sh + GridLineHalfThickness, _sw, _sh);
-                var rectangle = new Rectangle { Width = rect.Width, Height = rect.Height };
-                Canvas.SetLeft(rectangle, rect.Left);
-                Canvas.SetTop(rectangle, rect.Top);
-                rectangle.Fill = new SolidColorBrush(_cellColour);
-                rectangle.Tag = TagType.RoomBorder;
-                BoardCanvas.Children.Add(rectangle);
-            }
-
-            // Draw a black border around the room
+            var roomControl = new RoomControl(room, _numRows, _sw, _sh) {Tag = TagType.Room};
+            Canvas.SetLeft(roomControl, GridLineHalfThickness);
+            Canvas.SetTop(roomControl, GridLineHalfThickness);
+            BoardCanvas.Children.Add(roomControl);
         }
 
         public void DrawInitialValues(IImmutableList<InitialValue> initialValues)
@@ -71,23 +67,13 @@ namespace RippleEffectDlxWpf.View
         public void Reset()
         {
             RemoveChildrenWithTagType(
-                TagType.Cell,
-                TagType.RoomBorder,
+                TagType.Room,
                 TagType.InitialValue,
                 TagType.Digit);
         }
 
-        public void DrawGrid(int numRows, int numCols)
-        {
-            _numRows = numRows;
-            DrawGridLines(numRows, numCols);
-        }
-
         private void DrawGridLines(int numRows, int numCols)
         {
-            _sw = (ActualWidth - GridLineThickness) / numCols;
-            _sh = (ActualHeight - GridLineThickness) / numRows;
-
             var gridLineBrush = new SolidColorBrush(_gridColour);
 
             // Horizontal grid lines
