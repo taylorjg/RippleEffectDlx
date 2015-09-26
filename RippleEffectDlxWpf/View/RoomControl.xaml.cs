@@ -15,7 +15,8 @@ namespace RippleEffectDlxWpf.View
         private readonly int _numRows;
         private readonly double _sw;
         private readonly double _sh;
-        private const double BorderWidth = 4; // half of this width will be clipped away
+        private const double OuterCellLineWidth = 4; // half of this width will be clipped away
+        private const double InnerCellLineWidth = OuterCellLineWidth / 2;
         private readonly Color _cellColour = Colors.White;
         private readonly Color _roomBorderColour = Colors.Black;
 
@@ -24,8 +25,10 @@ namespace RippleEffectDlxWpf.View
             _numRows = numRows;
             _sw = sw;
             _sh = sh;
+
             InitializeComponent();
-            var clipGeometryGroup = new GeometryGroup();
+
+            var insideEdges = new List<Coords>();
             var outsideEdges = new List<Coords>();
 
             foreach (var cell in room.Cells)
@@ -36,10 +39,7 @@ namespace RippleEffectDlxWpf.View
                 Canvas.SetTop(rectangle, rect.Top);
                 rectangle.Fill = new SolidColorBrush(_cellColour);
                 RoomCanvas.Children.Add(rectangle);
-
-                var clipRectangleGeometry = new RectangleGeometry(rect);
-                clipGeometryGroup.Children.Add(clipRectangleGeometry);
-                DetermineOutsideEdges(outsideEdges, room.Cells, cell.Col, cell.Row);
+                DetermineEdges(insideEdges, outsideEdges, room.Cells, cell.Col, cell.Row);
             }
 
             var combinedOutsideEdges = CombineOutsideEdges(outsideEdges);
@@ -53,12 +53,11 @@ namespace RippleEffectDlxWpf.View
             var path = new Path
             {
                 Stroke = new SolidColorBrush(_roomBorderColour),
-                StrokeThickness = BorderWidth,
+                StrokeThickness = OuterCellLineWidth,
                 StrokeEndLineCap = PenLineCap.Square,
                 Data = pathGeometry
             };
             RoomCanvas.Children.Add(path);
-            RoomCanvas.Clip = clipGeometryGroup;
         }
 
         private enum Side
@@ -69,7 +68,12 @@ namespace RippleEffectDlxWpf.View
             Right
         };
 
-        private void DetermineOutsideEdges(ICollection<Coords> outsideEdges, IImmutableList<Coords> cells, int x, int y)
+        private void DetermineEdges(
+            ICollection<Coords> insideEdges,
+            ICollection<Coords> outsideEdges,
+            IImmutableList<Coords> cells,
+            int x,
+            int y)
         {
             var topEdge = cells.Max(c => c.Row) + 1;
             var bottomEdge = cells.Min(c => c.Row);
