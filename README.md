@@ -134,7 +134,7 @@ My next goal is to write a WPF app that visualises each step of the algorithm as
 
 * ~~Get basic window working with background and grid~~
 * ~~Draw the cells of a room~~
-* Draw the border around a room
+* ~~Draw the border around a room~~
 * Draw a number in a cell
 * Draw an initial value in a cell (like drawing a number but needs to look slightly different)
 * Add a Solve button
