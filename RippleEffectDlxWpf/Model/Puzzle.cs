@@ -2,9 +2,9 @@
 
 namespace RippleEffectDlxWpf.Model
 {
-    public class SamplePuzzle
+    public class Puzzle
     {
-        public SamplePuzzle(IImmutableList<Room> rooms, IImmutableList<InitialValue> initialValues)
+        public Puzzle(IImmutableList<Room> rooms, IImmutableList<InitialValue> initialValues)
         {
             Rooms = rooms;
             InitialValues = initialValues;

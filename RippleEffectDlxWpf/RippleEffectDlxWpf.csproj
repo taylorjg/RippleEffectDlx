@@ -59,6 +59,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ViewModel\PuzzleSolver.cs" />
     <Compile Include="View\RoomControl.xaml.cs">
       <DependentUpon>RoomControl.xaml</DependentUpon>
     </Compile>
@@ -75,7 +76,7 @@
     <Compile Include="Model\InitialValue.cs" />
     <Compile Include="Model\InternalRow.cs" />
     <Compile Include="Model\Room.cs" />
-    <Compile Include="Model\SamplePuzzle.cs" />
+    <Compile Include="Model\Puzzle.cs" />
     <Compile Include="Model\SamplePuzzle1.cs" />
     <Compile Include="Model\SamplePuzzles.cs" />
     <Compile Include="ViewModel\IBoardControl.cs" />

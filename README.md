@@ -137,8 +137,8 @@ My next goal is to write a WPF app that visualises each step of the algorithm as
 * ~~Draw the border around a room~~
 * ~~Draw a number in a cell~~
 * ~~Draw an initial value in a cell (like drawing a number but needs to look slightly different)~~
-* Solve the puzzle on a different thread
-* Render the solution
+* ~~Solve the puzzle on a different thread~~
+* ~~Render the solution~~
 * Render the search steps
 * Add a Solve button
 * Add a Cancel button

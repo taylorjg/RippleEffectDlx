@@ -2,8 +2,8 @@
 {
     public static partial class SamplePuzzles
     {
-        public static SamplePuzzle SamplePuzzle1 =>
-            new SamplePuzzle(
+        public static Puzzle SamplePuzzle1 =>
+            new Puzzle(
                 SamplePuzzle1Rooms,
                 SamplePuzzle1InitialValues);
     }
