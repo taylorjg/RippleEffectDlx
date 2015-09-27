@@ -5,9 +5,11 @@ namespace RippleEffectDlxWpf.ViewModel
 {
     public interface IBoardControl
     {
-        void DrawRooms(IImmutableList<Room> rooms);
-        void DrawInitialValues(IImmutableList<InitialValue> initialValues);
-        void DrawDigit(Coords coords, int value);
+        void AddRooms(IImmutableList<Room> rooms);
+        void AddInitialValues(IImmutableList<InitialValue> initialValues);
+        void AddDigit(Coords coords, int value);
+        bool HasDigitAt(Coords coords, int value);
+        void RemoveDigitsOtherThan(IImmutableList<InternalRow> internalRows);
         void Reset();
     }
 }

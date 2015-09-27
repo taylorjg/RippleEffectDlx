@@ -139,7 +139,7 @@ My next goal is to write a WPF app that visualises each step of the algorithm as
 * ~~Draw an initial value in a cell (like drawing a number but needs to look slightly different)~~
 * ~~Solve the puzzle on a different thread~~
 * ~~Render the solution~~
-* Render the search steps
+* ~~Render the search steps~~
 * Add a Solve button
 * Add a Cancel button
 * Add a slider to control the speed at which the search steps are displayed

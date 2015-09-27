@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Windows;
@@ -16,6 +17,7 @@ namespace RippleEffectDlxWpf.View
         private double _sw;
         private double _sh;
         private int _numRows;
+        private readonly IDictionary<Tuple<Coords, int>, FrameworkElement> _placedDigits = new Dictionary<Tuple<Coords, int>,FrameworkElement>();
 
         private enum TagType
         {
@@ -29,20 +31,21 @@ namespace RippleEffectDlxWpf.View
             InitializeComponent();
         }
 
-        public void DrawGrid(int numRows, int numCols)
+        public void InitialiseGrid(int numRows, int numCols)
         {
             _numRows = numRows;
             _sw = (ActualWidth - GridLineThickness) / numCols;
             _sh = (ActualHeight - GridLineThickness) / numRows;
         }
 
-        public void DrawRooms(IImmutableList<Room> rooms)
+        public void AddRooms(IImmutableList<Room> rooms)
         {
             foreach (var room in rooms)
-                DrawRoom(room);
+                AddRoom(room);
         }
 
-        private void DrawRoom(Room room)
+
+        private void AddRoom(Room room)
         {
             var roomControl = new RoomControl(room, _numRows, _sw, _sh) {Tag = TagType.Room};
             Canvas.SetLeft(roomControl, GridLineHalfThickness);
@@ -50,18 +53,37 @@ namespace RippleEffectDlxWpf.View
             BoardCanvas.Children.Add(roomControl);
         }
 
-        public void DrawInitialValues(IImmutableList<InitialValue> initialValues)
+        public void AddInitialValues(IImmutableList<InitialValue> initialValues)
         {
             foreach (var initialValue in initialValues)
-                DrawDigit(initialValue.Item1, initialValue.Item2, true);
+                AddDigit(initialValue.Item1, initialValue.Item2, true);
         }
 
-        public void DrawDigit(Coords coords, int value)
+        public void AddDigit(Coords coords, int value)
         {
-            DrawDigit(coords, value, false);
+            AddDigit(coords, value, false);
         }
 
-        private void DrawDigit(Coords coords, int value, bool isInitialValue)
+        public bool HasDigitAt(Coords coords, int value)
+        {
+            return _placedDigits.ContainsKey(Tuple.Create(coords, value));
+        }
+
+        public void RemoveDigitsOtherThan(IImmutableList<InternalRow> internalRows)
+        {
+            var placedDigitsToRemove = _placedDigits.Where(pd =>
+            {
+                return internalRows.FirstOrDefault(ir => ir.Item1.Equals(pd.Key.Item1) && ir.Item2 == pd.Key.Item2) == null;
+            }).ToList();
+
+            foreach (var placedDigitToRemove in placedDigitsToRemove)
+            {
+                BoardCanvas.Children.Remove(placedDigitToRemove.Value);
+                _placedDigits.Remove(placedDigitToRemove);
+            }
+        }
+
+        private void AddDigit(Coords coords, int value, bool isInitialValue)
         {
             // http://stackoverflow.com/questions/17828417/centering-text-vertically-and-horizontally-in-textblock-and-passwordbox-in-windo
 
@@ -71,7 +93,8 @@ namespace RippleEffectDlxWpf.View
                 FontSize = 48,
                 Foreground = new SolidColorBrush(Colors.Black),
                 Opacity = isInitialValue ? 0.6 : 1.0,
-                TextAlignment = TextAlignment.Center
+                TextAlignment = TextAlignment.Center,
+                Tag = isInitialValue ? TagType.InitialValue : TagType.Digit
             };
 
             var border = new Border
@@ -84,6 +107,9 @@ namespace RippleEffectDlxWpf.View
             Canvas.SetLeft(border, coords.Col * _sw + GridLineHalfThickness);
             Canvas.SetTop(border, (_numRows - coords.Row - 1) * _sh + GridLineHalfThickness);
             BoardCanvas.Children.Add(border);
+
+            if (!isInitialValue)
+                _placedDigits[Tuple.Create(coords, value)] = border;
         }
 
         public void Reset()
@@ -92,6 +118,8 @@ namespace RippleEffectDlxWpf.View
                 TagType.Room,
                 TagType.InitialValue,
                 TagType.Digit);
+
+            _placedDigits.Clear();
         }
 
         private void RemoveChildrenWithTagType(params TagType[] tagTypes)

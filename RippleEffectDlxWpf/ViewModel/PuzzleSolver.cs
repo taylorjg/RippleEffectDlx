@@ -14,17 +14,20 @@ namespace RippleEffectDlxWpf.ViewModel
     {
         private readonly Puzzle _puzzle;
         private readonly Action<IImmutableList<InternalRow>> _onSolutionFound;
+        private readonly Action<IImmutableList<InternalRow>> _onSearchStep;
         private readonly SynchronizationContext _synchronizationContext;
         private readonly CancellationToken _cancellationToken;
 
         public PuzzleSolver(
             Puzzle puzzle,
             Action<IImmutableList<InternalRow>> onSolutionFound,
+            Action<IImmutableList<InternalRow>> onSearchStep,
             SynchronizationContext synchronizationContext,
             CancellationToken cancellationToken)
         {
             _puzzle = puzzle;
             _onSolutionFound = onSolutionFound;
+            _onSearchStep = onSearchStep;
             _synchronizationContext = synchronizationContext;
             _cancellationToken = cancellationToken;
         }
@@ -58,6 +61,13 @@ namespace RippleEffectDlxWpf.ViewModel
             var numPrimaryColumns = numRowColPrimaryColumns + numCellWithinRoomPrimaryColumns;
 
             var dlx = new Dlx(_cancellationToken);
+
+            dlx.SearchStep += (_, searchStepEventArgs) =>
+            {
+                var subsetOfInternalRows = searchStepEventArgs.RowIndexes.Select(idx => internalRows[idx]).ToImmutableList();
+                _synchronizationContext.Post(_onSearchStep, subsetOfInternalRows);
+            };
+
             var firstSolution = dlx.Solve(dlxRows, d => d, r => r, numPrimaryColumns).FirstOrDefault();
 
             if (firstSolution != null)
