@@ -135,13 +135,14 @@ My next goal is to write a WPF app that visualises each step of the algorithm as
 * ~~Get basic window working with background and grid~~
 * ~~Draw the cells of a room~~
 * ~~Draw the border around a room~~
-* Draw a number in a cell
-* Draw an initial value in a cell (like drawing a number but needs to look slightly different)
-* Add a Solve button
-* Add code to solve the puzzle on a different thread
+* ~~Draw a number in a cell~~
+* ~~Draw an initial value in a cell (like drawing a number but needs to look slightly different)~~
+* Solve the puzzle on a different thread
 * Render the solution
 * Render the search steps
-* Add the ability to cancel the solving operation
+* Add a Solve button
+* Add a Cancel button
+* Add a slider to control the speed at which the search steps are displayed
 
 ## Links
 

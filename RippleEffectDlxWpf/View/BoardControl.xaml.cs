@@ -1,7 +1,9 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using RippleEffectDlxWpf.Model;
 using RippleEffectDlxWpf.ViewModel;
 
@@ -50,12 +52,38 @@ namespace RippleEffectDlxWpf.View
 
         public void DrawInitialValues(IImmutableList<InitialValue> initialValues)
         {
-            // Draw a slightly greyed out / semi-transparent number in the middle of the cell
+            foreach (var initialValue in initialValues)
+                DrawDigit(initialValue.Item1, initialValue.Item2, true);
         }
 
         public void DrawDigit(Coords coords, int value)
         {
-            // Draw a black number in the middle of the cell
+            DrawDigit(coords, value, false);
+        }
+
+        private void DrawDigit(Coords coords, int value, bool isInitialValue)
+        {
+            // http://stackoverflow.com/questions/17828417/centering-text-vertically-and-horizontally-in-textblock-and-passwordbox-in-windo
+
+            var textBlock = new TextBlock
+            {
+                Text = Convert.ToString(value),
+                FontSize = 48,
+                Foreground = new SolidColorBrush(Colors.Black),
+                Opacity = isInitialValue ? 0.6 : 1.0,
+                TextAlignment = TextAlignment.Center
+            };
+
+            var border = new Border
+            {
+                Width = _sw,
+                Height = _sh,
+                Child = textBlock
+            };
+
+            Canvas.SetLeft(border, coords.Col * _sw + GridLineHalfThickness);
+            Canvas.SetTop(border, (_numRows - coords.Row - 1) * _sh + GridLineHalfThickness);
+            BoardCanvas.Children.Add(border);
         }
 
         public void Reset()

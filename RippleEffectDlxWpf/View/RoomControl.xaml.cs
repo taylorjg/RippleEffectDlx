@@ -87,7 +87,7 @@ namespace RippleEffectDlxWpf.View
             Right
         };
 
-        private void DetermineEdges(
+        private static void DetermineEdges(
             ICollection<Coords> insideEdges,
             ICollection<Coords> outsideEdges,
             IImmutableList<Coords> cells,
@@ -98,12 +98,12 @@ namespace RippleEffectDlxWpf.View
             var bottomEdge = cells.Min(c => c.Row);
             var leftEdge = cells.Min(c => c.Col);
             var rightEdge = cells.Max(c => c.Col) + 1;
-            ICollection<Coords> edges;
 
             Func<int, int, bool> roomHasCellAt = (col, row) => cells.Contains(new Coords(row, col));
 
             foreach (var side in Enum.GetValues(typeof(Side)).Cast<Side>())
             {
+                ICollection<Coords> edges;
                 var isOutsideEdge = false;
 
                 switch (side)
