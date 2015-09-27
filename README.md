@@ -124,6 +124,10 @@ This is a screenshot of RippleEffectDlxConsole solving the above puzzle:
 
 ![Screenshot](https://raw.github.com/taylorjg/RippleEffectDlx/master/Images/Screenshot.png)
 
+This is a shot of the WPF app (work in progress):
+
+![ScreenshotWpfApp](https://raw.github.com/taylorjg/RippleEffectDlx/master/Images/ScreenshotWpfApp.png)
+
 ## Future Plans
 
 I now have a quick and dirty console app that proves that this type of puzzle

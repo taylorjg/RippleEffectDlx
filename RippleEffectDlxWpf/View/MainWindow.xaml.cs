@@ -53,8 +53,8 @@ namespace RippleEffectDlxWpf.View
 
         private void OnSolutionFound(IImmutableList<InternalRow> internalRows)
         {
-            foreach (var internalRow in internalRows.Where(ir => !ir.Item4))
-                BoardControl.AddDigit(internalRow.Item1, internalRow.Item2);
+            //foreach (var internalRow in internalRows.Where(ir => !ir.Item4))
+            //    BoardControl.AddDigit(internalRow.Item1, internalRow.Item2);
         }
 
         private void OnSearchStep(IImmutableList<InternalRow> internalRows)
