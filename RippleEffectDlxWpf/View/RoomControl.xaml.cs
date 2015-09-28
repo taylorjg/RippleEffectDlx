@@ -15,10 +15,11 @@ namespace RippleEffectDlxWpf.View
         private readonly int _numRows;
         private readonly double _sw;
         private readonly double _sh;
-        private const double OuterCellLineWidth = 4;
-        private const double InnerCellLineWidth = OuterCellLineWidth / 4;
+        private const double OuterCellLineWidth = 6;
+        private const double InnerCellLineWidth = 1;
         private readonly Color _cellColour = Colors.White;
-        private readonly Color _roomBorderColour = Colors.Black;
+        private readonly Color _outerCellLineColour = Colors.Black;
+        private readonly Color _innerCellLineColour = Colors.Black;
 
         public RoomControl(Room room, int numRows, double sw, double sh)
         {
@@ -55,7 +56,7 @@ namespace RippleEffectDlxWpf.View
                     Y1 = pt1.Y,
                     X2 = pt2.X,
                     Y2 = pt2.Y,
-                    Stroke = new SolidColorBrush(_roomBorderColour),
+                    Stroke = new SolidColorBrush(_innerCellLineColour),
                     StrokeThickness = InnerCellLineWidth
                 };
                 RoomCanvas.Children.Add(line);
@@ -71,7 +72,7 @@ namespace RippleEffectDlxWpf.View
             pathGeometry.Figures.Add(pathFigure);
             var path = new Path
             {
-                Stroke = new SolidColorBrush(_roomBorderColour),
+                Stroke = new SolidColorBrush(_outerCellLineColour),
                 StrokeThickness = OuterCellLineWidth,
                 StrokeEndLineCap = PenLineCap.Square,
                 Data = pathGeometry
