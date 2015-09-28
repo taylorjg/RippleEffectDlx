@@ -1,16 +1,19 @@
 
 ## Description
 
-I was [recently contacted ](https://github.com/taylorjg/DlxLib/pull/2)
-by somebody with reference to (the lack of) support for secondary columns in
+I recently received a [pull request](https://github.com/taylorjg/DlxLib/pull/2)
+adding support for secondary columns to
 [my implementation](https://github.com/taylorjg/DlxLib)
-of [DLX](https://en.wikipedia.org/wiki/Dancing_Links). I must confess that I did
-not make it to the end of the [original paper](http://arxiv.org/pdf/cs/0011047v1.pdf).
-I am now in the process of adding this support to
+of [DLX](https://en.wikipedia.org/wiki/Dancing_Links). I must confess that
+these were new to me because I didn't make it to the end of the
+[original paper](http://arxiv.org/pdf/cs/0011047v1.pdf).
+I am now in the process of adding my own support for this feature to
 [DlxLib](https://github.com/taylorjg/DlxLib). As such, I thought I would try to solve
-[Ripple Effect](https://en.wikipedia.org/wiki/Ripple_Effect_(puzzle)) puzzles because
-this is what motivated the person mentioned above.
-It took me a while to figure out how to do this but I finally got there.
+[Ripple Effect](https://en.wikipedia.org/wiki/Ripple_Effect_%28puzzle%29) puzzles because
+this is what motivated the originator of the pull request mentioned above.
+It took me a while to figure out how to apply
+[DLX](https://en.wikipedia.org/wiki/Dancing_Links) to
+[Ripple Effect](https://en.wikipedia.org/wiki/Ripple_Effect_%28puzzle%29) puzzles but I finally got there.
 
 I also have another project which makes use of secondary columns - see
 [TetraSticks](https://github.com/taylorjg/TetraSticks).
@@ -150,9 +153,9 @@ My next goal is to write a WPF app that visualises each step of the algorithm as
 
 ## Links
 
-* https://en.wikipedia.org/wiki/Ripple_Effect_(puzzle)
-* http://www.nikoli.co.jp/en/puzzles/ripple_effect.html
-* http://www.nikoli.com/en/puzzles/ripple_effect/
+* [Ripple Effect (puzzle) on Wikipedia](https://en.wikipedia.org/wiki/Ripple_Effect_%28puzzle%29)
+* [Puzzles &gt; Ripple Effect [Nikoli]](http://www.nikoli.co.jp/en/puzzles/ripple_effect.html)
+* [Sample problems of Ripple Effect puzzle [nikoli.com]](http://www.nikoli.com/en/puzzles/ripple_effect/)
 * [DLX](https://en.wikipedia.org/wiki/Dancing_Links)
 * [Algorithm X](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X)
 * [DlxLib](https://github.com/taylorjg/DlxLib)
