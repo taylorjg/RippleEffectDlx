@@ -13,6 +13,8 @@ namespace RippleEffectDlxWpf.View
     {
         private readonly DispatcherTimer _timer = new DispatcherTimer();
         private readonly Queue<IImmutableList<InternalRow>> _searchSteps = new Queue<IImmutableList<InternalRow>>();
+        private PuzzleSolver _puzzleSolver;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public MainWindow()
         {
@@ -20,7 +22,6 @@ namespace RippleEffectDlxWpf.View
 
             _timer.Tick += (_, __) => OnTick();
             _timer.Interval = TimeSpan.FromMilliseconds(100);
-            _timer.Start();
 
             ContentRendered += (_, __) =>
             {
@@ -28,21 +29,33 @@ namespace RippleEffectDlxWpf.View
                 BoardControl.AddRooms(SamplePuzzles.SamplePuzzle1.Rooms);
                 BoardControl.AddInitialValues(SamplePuzzles.SamplePuzzle1.InitialValues);
 
-                var puzzleSolver = new PuzzleSolver(
+                _cancellationTokenSource = new CancellationTokenSource();
+
+                _puzzleSolver = new PuzzleSolver(
                     SamplePuzzles.SamplePuzzle1,
                     OnSolutionFound,
                     OnSearchStep,
                     SynchronizationContext.Current,
-                    CancellationToken.None);
+                    _cancellationTokenSource.Token);
 
-                puzzleSolver.SolvePuzzle();
+                _puzzleSolver.SolvePuzzle();
             };
+
+            Closed += (_, __) => _cancellationTokenSource?.Cancel();
         }
 
         private void OnTick()
         {
             if (!_searchSteps.Any()) return;
+
             var internalRows = _searchSteps.Dequeue();
+
+            if (internalRows == null)
+            {
+                _timer.Stop();
+                return;
+            }
+
             foreach (var internalRow in internalRows.Where(ir => !ir.Item4))
             {
                 if (BoardControl.HasDigitAt(internalRow.Item1, internalRow.Item2)) continue;
@@ -53,12 +66,14 @@ namespace RippleEffectDlxWpf.View
 
         private void OnSolutionFound(IImmutableList<InternalRow> internalRows)
         {
-            //foreach (var internalRow in internalRows.Where(ir => !ir.Item4))
-            //    BoardControl.AddDigit(internalRow.Item1, internalRow.Item2);
+            _searchSteps.Enqueue(null);
+            _puzzleSolver = null;
+            _cancellationTokenSource = null;
         }
 
         private void OnSearchStep(IImmutableList<InternalRow> internalRows)
         {
+            if (!_timer.IsEnabled) _timer.Start();
             _searchSteps.Enqueue(internalRows);
         }
     }
