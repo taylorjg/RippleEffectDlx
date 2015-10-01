@@ -7,7 +7,7 @@ adding support for secondary columns to
 of [DLX](https://en.wikipedia.org/wiki/Dancing_Links). I must confess that
 these were new to me because I didn't make it to the end of the
 [original paper](http://arxiv.org/pdf/cs/0011047v1.pdf).
-I am now in the process of adding my own support for this feature to
+I have now added my own support for this feature to
 [DlxLib](https://github.com/taylorjg/DlxLib). As such, I thought I would try to solve
 [Ripple Effect](https://en.wikipedia.org/wiki/Ripple_Effect_%28puzzle%29) puzzles because
 this is what motivated the originator of the pull request mentioned above.
@@ -127,15 +127,9 @@ This is a screenshot of RippleEffectDlxConsole solving the above puzzle:
 
 ![Screenshot](https://raw.github.com/taylorjg/RippleEffectDlx/master/Images/Screenshot.png)
 
-This is a shot of the WPF app (work in progress):
+This is a shot of the WPF app solving the same puzzle:
 
 ![ScreenshotWpfApp](https://raw.github.com/taylorjg/RippleEffectDlx/master/Images/ScreenshotWpfApp.png)
-
-## Future Plans
-
-I now have a quick and dirty console app that proves that this type of puzzle
-can be solved using [DLX](https://en.wikipedia.org/wiki/Dancing_Links) with secondary columns.
-My next goal is to write a WPF app that visualises each step of the algorithm as it solves the puzzle.
 
 ## WPF App TODO List
 
